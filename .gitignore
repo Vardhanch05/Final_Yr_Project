@@ -54,3 +54,6 @@ desktop.ini
 scratch/
 temp/
 tmp/
+experiments/cache/
+tabm/paper/local/
+tabm/paper/data/
