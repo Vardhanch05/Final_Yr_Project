@@ -149,8 +149,8 @@ class TabularDataset:
 
 def load_tabred_dataset(dataset_dir: Path) -> TabularDataset:
     """
-    Loads an official TabReD temporal dataset with quantile normalization and fixed splits.
-    Raises explicit exceptions on corrupt or missing files (no silent loss).
+    Loads an official TabReD or paper benchmark dataset with quantile normalization and fixed splits.
+    Standalone NumPy implementation with zero dependency on paper lib/env.py cwd restrictions.
     """
     if not dataset_dir.exists():
         raise FileNotFoundError(f"Dataset directory does not exist: {dataset_dir}")
@@ -158,35 +158,50 @@ def load_tabred_dataset(dataset_dir: Path) -> TabularDataset:
     if not info_path.exists():
         raise FileNotFoundError(f"Missing info.json in: {dataset_dir}")
 
-    from lib.data import Dataset, transform_num, transform_cat
-    ds = Dataset.from_dir(dataset_dir)
     info = json.loads(info_path.read_text())
-    task_type = 'regression' if ds.task.is_regression else 'binclass'
-
-    # Official noisy-quantile preprocessing
-    if 'x_num' in ds:
-        ds['x_num'] = transform_num(ds['x_num'], policy='noisy-quantile', seed=0)
-
-    # Ordinal encoding for categoricals
-    if 'x_cat' in ds:
-        ds['x_cat'] = transform_cat(ds['x_cat'], policy='ordinal')
-
-    cat_cards = ds.compute_cat_cardinalities()
+    task_type = 'regression' if info['task_type'] == 'regression' else 'binclass'
 
     parts = ['train', 'val', 'test']
+    
+    # Load raw feature arrays
+    has_num = (dataset_dir / "X_num_train.npy").exists()
+    has_bin = (dataset_dir / "X_bin_train.npy").exists()
+    has_cat = (dataset_dir / "X_cat_train.npy").exists()
+
+    x_num = {p: np.load(dataset_dir / f"X_num_{p}.npy") for p in parts} if has_num else None
+    x_bin = {p: np.load(dataset_dir / f"X_bin_{p}.npy") for p in parts} if has_bin else None
+    x_cat = {p: np.load(dataset_dir / f"X_cat_{p}.npy") for p in parts} if has_cat else None
+    y_raw = {p: np.load(dataset_dir / f"Y_{p}.npy") for p in parts}
+
+    # Official paper preprocessing: noisy-quantile normalization
+    if x_num is not None:
+        qt = QuantileTransformer(
+            n_quantiles=max(min(len(x_num['train']) // 30, 1000), 10),
+            output_distribution='normal',
+            random_state=0
+        )
+        noise = np.random.RandomState(0).normal(0.0, 1e-5, x_num['train'].shape)
+        x_num['train'] = qt.fit_transform(x_num['train'] + noise)
+        x_num['val'] = qt.transform(x_num['val'])
+        x_num['test'] = qt.transform(x_num['test'])
+
+    cat_cards = []
+    if x_cat is not None:
+        cat_cards = [len(np.unique(x_cat['train'][:, col])) for col in range(x_cat['train'].shape[1])]
+
     X_parts = {}
-    for part in parts:
+    for p in parts:
         feats = []
-        if 'x_num' in ds: feats.append(ds['x_num'][part])
-        if 'x_bin' in ds: feats.append(ds['x_bin'][part])
-        if 'x_cat' in ds: feats.append(ds['x_cat'][part])
-        X_parts[part] = np.concatenate(feats, axis=1)
+        if x_num is not None: feats.append(x_num[p])
+        if x_bin is not None: feats.append(x_bin[p])
+        if x_cat is not None: feats.append(x_cat[p])
+        X_parts[p] = np.concatenate(feats, axis=1)
 
     scaler_y = None
-    y_train = ds.task.labels['train'].copy()
-    y_val_raw = ds.task.labels['val'].copy()
-    y_val = ds.task.labels['val'].copy()
-    y_test = ds.task.labels['test'].copy()
+    y_train = y_raw['train'].astype(np.float32)
+    y_val_raw = y_raw['val'].astype(np.float32)
+    y_val = y_raw['val'].astype(np.float32)
+    y_test = y_raw['test'].astype(np.float32)
 
     if task_type == 'regression':
         scaler_y = StandardScaler()
@@ -238,6 +253,16 @@ def get_or_create_cached_predictions(
     Persists val_preds.pt, test_preds.pt, y_val.pt, y_test.pt, and metadata.json
     keyed by (dataset, seed, config_hash).
     """
+    # Use paper's tuned hyperparameter config if available (e.g. California)
+    if dataset.name == 'california':
+        n_blocks = 3
+        d_block = 400
+        dropout = 0.2077
+        lr = 0.0008725
+        weight_decay = 0.03777
+        patience = 16
+        max_epochs = 250
+
     hyperparams = {
         "dataset": dataset.name,
         "k_members": k_members,
@@ -661,7 +686,10 @@ def run_offline_pipeline(
 
 
 def build_development_datasets() -> List[TabularDataset]:
-    """Builds standard development dataset (California Housing only)."""
+    """Builds official development dataset (California Housing) with fixed paper split."""
+    cal_dir = Path("tabm/paper/data/california")
+    if cal_dir.exists():
+        return [load_tabred_dataset(cal_dir)]
     cal = fetch_california_housing()
     return [TabularDataset("california", "regression", is_temporal=False, X_raw=cal.data, y_raw=cal.target)]
 
