@@ -54,14 +54,26 @@ Does post-hoc, sample-adaptive weighting (and robust parametric/non-parametric a
 - **Equivalence Rule:** Equivalence to naive uniform averaging is declared if the **90% Confidence Interval** (equivalent to two one-sided tests at $\alpha=0.05$) of the median relative delta across datasets lies strictly within $[-\Delta, +\Delta] = [-0.50\%, +0.50\%]$.
 - *Statistical Power Caveat:* With $N=8$ datasets, confidence intervals on the median will be wide. If the 90% CI spans zero but extends beyond $\pm 0.50\%$, the outcome is formally classified as *inconclusive* (insufficient sample size to confirm equivalence).
 
-### Pre-Registered Data-Dependent Tie Rule
-- **Definition:** An observed gain $\Delta$ for a comparison is classified as a "Tie" if $|\Delta| \le \sigma_{\text{seed}}$, where:
-  $$\sigma_{\text{seed}} = \frac{1}{D}\sum_{d=1}^D \mathrm{std}_{s}(\Delta_{d,s})$$
-  is the mean cross-seed standard deviation observed across the evaluated seeds ($s \in \{0, 1, 2, 3, 4\}$).
+### Pre-Registered Data-Dependent Tie Rule (Amended v2)
+- **Candidate-Independent Baseline Noise ($\sigma_{\text{base}}$):**
+  To prevent volatile candidate aggregators from receiving unfairly wide tie margins compared to stable aggregators, the tie threshold is strictly candidate-independent, defined by the cross-seed coefficient of variation of the naive uniform baseline:
+  $$\sigma_{\text{base}, d} = \frac{\mathrm{std}_{s}(\text{Score}_{\text{base}, d, s})}{\mathrm{mean}_{s}(\text{Score}_{\text{base}, d, s})} \times 100\%$$
+  The benchmark-level threshold is the mean across datasets:
+  $$\sigma_{\text{base}} = \frac{1}{D}\sum_{d=1}^D \sigma_{\text{base}, d}$$
+- **Decision Rule (Computed at full precision):**
+  - **Win:** $\Delta > +\sigma_{\text{base}}$
+  - **Loss:** $\Delta < -\sigma_{\text{base}}$
+  - **Tie:** $|\Delta| \le \sigma_{\text{base}}$
+- **Sensitivity Threshold:** In parallel, all outcomes are evaluated against the pre-registered fixed margin of $\pm 0.50\%$ relative change.
 - **Metric Definitions:**
   - Regression: Relative change in RMSE ($\frac{\text{RMSE}_{\text{base}} - \text{RMSE}_{\text{cand}}}{\text{RMSE}_{\text{base}}} \times 100\%$).
   - Binary Classification: Relative error-reduction in ROC-AUC ($\frac{\text{AUC}_{\text{cand}} - \text{AUC}_{\text{base}}}{1.0 - \text{AUC}_{\text{base}}} \times 100\%$).
-  *(Note: Regression percentages and classification error-reduction percentages are tracked and reported with explicit task units).*
+
+### Amendment History
+- **Amendment v2 (October 16, 2026, Pre-Confirmatory):**
+  - *Change:* Replaced candidate-dependent paired delta standard deviation ($\sigma_{\text{cand}} = \mathrm{std}_s(\Delta_{\text{cand}, s})$) with candidate-independent baseline standard deviation ($\sigma_{\text{base}}$).
+  - *Motivation:* Grounded strictly in dev results on California ($N=1, S=5$), where TabM[G] received a wide threshold ($\sigma=0.282\%$) while trimmed mean received a narrow threshold ($\sigma=0.022\%$). Amending to baseline noise ensures an equal, invariant tie band for all competitor aggregators.
+  - *Timing:* Formalized and committed prior to executing any confirmatory benchmark runs.
 
 ---
 
