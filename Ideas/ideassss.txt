@@ -1,0 +1,2254 @@
+Machine Learning (ML)
+Machine Learning (ML)
+I’d focus here on general ML research problems rather than routine applications like stock prediction, disease prediction, recommendation, etc.
+
+1. OoD-Bench: Quantifying and Understanding Two Dimensions of Out-of-Distribution Generalization
+1. Paper
+OoD-Bench: Quantifying and Understanding Two Dimensions of Out-of-Distribution Generalization — CVPR 2022. 
+
+2. ID of the paper
+CVPR 2022
+Pages: 7947–7958.
+
+3. What is the paper about and what did they discuss/propose?
+The paper studies what happens when the training and testing distributions are different.
+
+It identifies two types of distribution shift:
+
+Diversity shift
+Correlation shift
+It creates a benchmark to measure these shifts and evaluates existing ML algorithms under them. 
+
+4. GitHub repo
+OoD-Bench GitHub
+
+The repository provides the benchmark and modified DomainBed implementation. 
+
+5. Future scopes and limitations
+Potential directions:
+
+Better adaptation to unseen distributions
+Detect the type of distribution shift automatically
+Develop models that adapt differently to diversity vs correlation shift
+Test on more real-world datasets
+Reduce performance degradation under severe shift
+6. Feasibility of implementing that scope and publishing it
+9/10
+
+A strong project could be:
+
+Adaptive ML for Unknown Distribution Shifts
+
+Instead of using one fixed model:
+
+Input data
+   ↓
+Detect distribution shift
+   ↓
+Identify shift type
+   ↓
+Select/adapt ML strategy
+   ↓
+Prediction
+This is experimentally measurable and does not require training huge models.
+
+7. Have those limitations/future scopes been overcome?
+Partially — important.
+
+There has been significant progress after this paper. In fact, the authors themselves released OoD-Bench+, published in TPAMI 2025, with improved shift quantification and additional datasets. 
+
+So:
+
+Original benchmark limitation → substantially addressed.
+
+But:
+
+Automatically adapting to an unknown shift → still a research opportunity.
+
+Research potential: 9/10
+Feasibility: 9/10 ⭐
+
+2. Fishr: Invariant Gradient Variances for Out-of-Distribution Generalization
+1. Paper
+Fishr: Invariant Gradient Variances for Out-of-Distribution Generalization — ICML 2022. 
+
+2. ID of the paper
+PMLR Volume 162
+Pages 18347–18377.
+
+3. What is the paper about and what did they discuss/propose?
+Fishr tries to make models generalize better when the test distribution differs from training distributions.
+
+The key idea is to match gradient variance across training environments.
+
+The authors report that Fishr improves performance on the DomainBed benchmark and performs better than standard ERM in their experiments. 
+
+4. GitHub repo
+Fishr GitHub 
+
+5. Future scopes and limitations
+Possible extensions:
+
+adaptive gradient matching
+handling more severe distribution shifts
+reducing computational cost
+combining Fishr with test-time adaptation
+applying it to tabular/time-series problems rather than mainly benchmark vision datasets
+6. Feasibility
+8.5/10
+
+A good B.Tech research direction:
+
+Adaptive Fishr for Dynamic Distribution Shift
+
+Instead of assuming training environments are equally useful, dynamically estimate which environments are changing and adjust the gradient regularization.
+
+You can compare:
+
+ERM → Fishr → Adaptive-Fishr
+
+7. Have those limitations/future scopes been overcome?
+Partially.
+
+OOD generalization has become a very active research field, and many newer methods have been proposed.
+
+Therefore, "improve Fishr" alone isn't enough.
+
+The stronger gap would be something specific such as:
+
+Fishr + online/test-time adaptation under continuous distribution shift.
+
+Research potential: 8.5/10
+Feasibility: 8.5/10
+
+3. Improving Out-of-Distribution Generalization by Adversarial Training with Structured Priors
+1. Paper
+Improving Out-of-Distribution Generalization by Adversarial Training with Structured Priors — NeurIPS 2022.
+
+2. ID of the paper
+NeurIPS 2022
+
+3. What is the paper about and what did they discuss/propose?
+The paper investigates whether adversarial training can improve OOD generalization.
+
+It proposes structured-prior approaches, including:
+
+MAT
+LDAT
+The goal is to improve robustness to distribution changes. The official implementation is built using DomainBed. 
+
+4. GitHub repo
+Official GitHub repository 
+
+5. Future scopes and limitations
+Potential directions:
+
+reduce adversarial-training computational cost
+improve robustness against unseen shifts
+combine adversarial training with shift detection
+adapt perturbation strength dynamically
+investigate tabular/time-series data
+6. Feasibility
+8/10
+
+A reasonable project:
+
+Adaptive Adversarial Training for Distribution Shift
+
+Instead of using a fixed perturbation strength:
+
+Detect shift severity
+       ↓
+Small shift → small perturbation
+Large shift → stronger perturbation
+Compare fixed vs adaptive perturbation.
+
+7. Have those limitations/future scopes been overcome?
+Partially.
+
+OOD robustness and adaptive adversarial training have been actively studied since 2022.
+
+So the basic idea is not novel anymore.
+
+A specific combination such as shift-severity estimation + adaptive adversarial training would need a fresh literature check before claiming novelty.
+
+Research potential: 8/10
+Feasibility: 8/10
+
+4. Minimax Classification under Concept Drift with Multidimensional Adaptation and Performance Guarantees
+1. Paper
+Minimax Classification under Concept Drift with Multidimensional Adaptation and Performance Guarantees — ICML 2022.
+
+2. ID of the paper
+ICML 2022
+
+3. What is the paper about and what did they discuss/propose?
+This paper deals with concept drift.
+
+Concept drift means:
+
+The relationship between input and output changes over time.
+
+For example:
+
+2022:
+Customer behaviour → A
+
+2026:
+Customer behaviour → B
+The proposed AMRC method continuously adapts the classifier and provides performance/error guarantees under changing data. 
+
+4. GitHub repo
+AMRC GitHub 
+
+It has both Python and MATLAB implementations and uses 13 public datasets plus synthetic data. 
+
+5. Future scopes and limitations
+Potential directions:
+
+deep neural-network integration
+high-dimensional data
+non-stationary environments
+automatic drift detection
+adaptive learning rates
+computationally efficient online adaptation
+6. Feasibility
+9/10
+
+This is quite attractive for a student project.
+
+Possible extension:
+
+Deep Adaptive Concept-Drift Detection and Classification
+
+Compare:
+
+Static ML → Online ML → AMRC → Proposed adaptive model
+
+Datasets can include:
+
+electricity
+weather
+credit-card transactions
+network traffic
+synthetic drift
+The repository already provides several suitable datasets. 
+
+7. Have those limitations/future scopes been overcome?
+Partially.
+
+Concept drift has a huge literature, so "concept drift detection" itself is not novel.
+
+But combining:
+
+drift detection + uncertainty + automatic model adaptation + performance guarantees
+
+is much more interesting.
+
+Research potential: 9/10
+Feasibility: 9/10 ⭐
+
+5. Neural Ensemble Search for Uncertainty Estimation and Dataset Shift
+1. Paper
+Neural Ensemble Search for Uncertainty Estimation and Dataset Shift — 2021.
+
+2. ID of the paper
+NeurIPS 2021
+Also presented at the ICML 2020 UDL workshop.
+
+3. What is the paper about and what did they discuss/propose?
+The paper proposes using Neural Ensemble Search (NES) to automatically find ensembles of models that produce:
+
+good predictions
+calibrated uncertainty
+better behaviour under dataset shift
+The key idea is to search for useful combinations of neural networks rather than manually constructing an ensemble. 
+
+4. GitHub repo
+Neural Ensemble Search GitHub 
+
+5. Future scopes and limitations
+Possible extensions:
+
+reduce ensemble-search cost
+dynamically select ensemble members
+adapt ensembles when distribution shifts
+lightweight ensemble search
+uncertainty-aware model selection
+6. Feasibility
+8/10
+
+A good extension:
+
+Dynamic Ensemble Selection under Distribution Shift
+
+Instead of using the same ensemble for every input:
+
+Input
+ ↓
+Estimate uncertainty / shift
+ ↓
+Select best ensemble members
+ ↓
+Prediction
+This gives you measurable metrics:
+
+accuracy
+calibration
+OOD accuracy
+inference time
+number of models used
+7. Have those limitations/future scopes been overcome?
+Partially.
+
+Dynamic ensemble selection and uncertainty estimation have substantial follow-up literature.
+
+Therefore, the simple idea of "select the best models dynamically" is already explored.
+
+A stronger contribution would need a specific mechanism for cost-aware dynamic ensemble selection under distribution shift.
+
+Research potential: 8/10
+Feasibility: 8/10
+
+My ranking for ML
+Rank	Paper	Main area	Research potential	Feasibility
+🥇	OoD-Bench — 2022	Distribution shift	9/10	9/10
+🥈	AMRC — 2022	Concept drift	9/10	9/10
+🥉	Fishr — 2022	OOD generalization	8.5/10	8.5/10
+4	Adversarial Training + Structured Priors — 2022	Robust ML	8/10	8/10
+5	Neural Ensemble Search — 2021	Uncertainty/shift	8/10	8/10
+What I would investigate first
+For your paper → GitHub → reproduce → find gap → extend → publish strategy, I'd investigate these two first:
+
+🥇 OoD-Bench
+→ Can we automatically identify the type/severity of distribution shift and adapt the ML model accordingly?
+
+🥈 AMRC
+→ Can we combine concept-drift detection with modern deep learning and uncertainty-aware adaptation?
+
+Both are much more research-oriented than building another conventional ML prediction system.
+
+
+Deep Learning (DL)
+Deep Learning (DL) research papers — 2020–2026
+For this topic, I’ll focus on deep neural networks, generalization, robustness, uncertainty, and reproducibility rather than routine image-classification projects.
+
+For your paper-to-publication approach, I’ll distinguish between a paper’s documented findings and a possible extension. A limitation is not automatically a research gap: we still need to check whether later work has already addressed it.
+
+Here are 5 Deep Learning papers worth investigating. I’ve prioritised papers with public implementations and extensions that can be tested experimentally.
+
+1. Loss of Plasticity in Deep Continual Learning
+Strong candidate
+1. Paper
+
+Loss of Plasticity in Deep Continual Learning — Nature, 2024. 
+
+Nature
+
+2. ID of the paper
+
+DOI: 10.1038/s41586-024-07711-7
+
+Published: 2024
+
+3. What is it about?
+
+The paper investigates why deep neural networks gradually become less capable of learning new information when trained continuously. It proposes Continual Backpropagation, which periodically reinitialises less-used network units to maintain learning capacity. 
+
+Nature
+
+4. GitHub repo
+
+Official implementation
+
+5. Future scopes and limitations
+
+Test the method on more architectures and datasets.
+
+Study whether it works for continual learning with changing real-world data.
+
+Reduce the risk of damaging useful learned features during reinitialisation.
+
+Compare alternative neuron-selection and reinitialisation strategies.
+
+6. Feasibility and publication potential
+
+Feasibility: 8/10
+
+Research potential: 9/10
+
+Possible extension: Adaptive Neuron Reinitialisation Based on Learning Utility.
+
+Compare fixed-rate reinitialisation against a method that uses neuron activity, gradient information and learning progress to decide when to reinitialise units.
+
+7. Have these limitations been overcome?
+
+Partially; further verification needed. The original paper provides a working approach, so continual learning is not an untouched problem. Later research must be checked specifically for adaptive reinitialisation based on neuron utility before claiming novelty. 
+
+GitHub
+
+2. Deep Stable Learning for Out-of-Distribution Generalization
+1. Paper
+
+Deep Stable Learning for Out-of-Distribution Generalization — CVPR, 2021. 
+
+Open Access CVF
+
+2. ID of the paper
+
+arXiv: 2104.07876
+
+CVPR 2021
+
+3. What is it about?
+
+Deep networks often learn misleading correlations in training data. The paper proposes StableNet, which reweights training samples to reduce dependencies between features and encourage the model to learn more stable predictive relationships. 
+
+Open Access CVF
+
+4. GitHub repo
+
+Official StableNet repository
+
+5. Future scopes and limitations
+
+Improve stability across different datasets and environments.
+
+Reduce sensitivity to hyperparameter selection.
+
+Test on severe and previously unseen distribution shifts.
+
+Extend the method to time-series or tabular data.
+
+6. Feasibility and publication potential
+
+Feasibility: 8.5/10
+
+Research potential: 8.5/10
+
+Possible extension: Adaptive Stable Learning under Unknown Distribution Shifts.
+
+Develop a method that adjusts sample weights when the data distribution changes, then compare it with StableNet and standard empirical risk minimisation.
+
+7. Have these limitations been overcome?
+
+Partially. OOD generalisation has progressed substantially since 2021, and later benchmarks and methods address several forms of distribution shift. The particular adaptive weighting approach would need a focused literature review to determine whether it remains novel.
+
+3. On the Impact of Spurious Correlation for Out-of-Distribution Detection
+1. Paper
+
+On the Impact of Spurious Correlation for Out-of-Distribution Detection — AAAI, 2022. 
+
+AAAI Publications
+
+2. ID of the paper
+
+DOI: 10.1609/aaai.v36i9.21244
+
+AAAI 2022
+
+3. What is it about?
+
+The paper studies how misleading correlations in training data affect a neural network's ability to detect unfamiliar inputs. It shows that stronger correlations between environmental features and labels can severely damage OOD detection performance. 
+
+AAAI Publications
+
+4. GitHub repo
+
+Official implementation
+
+5. Future scopes and limitations
+
+Improve OOD detection when spurious correlations are strong.
+
+Handle multiple simultaneous environmental biases.
+
+Test robustness under different types of distribution shifts.
+
+Reduce dependence on knowing how the training data is biased.
+
+6. Feasibility and publication potential
+
+Feasibility: 9/10
+
+Research potential: 8.5/10
+
+Possible extension: Spurious-Correlation-Aware OOD Detection without Prior Bias Information.
+
+Test whether a model can identify unreliable features and improve OOD detection without being told which features are spurious.
+
+7. Have these limitations been overcome?
+
+Partially. Spurious-feature robustness and OOD detection have received extensive follow-up research. You must check whether your exact combination of unknown bias identification and OOD detection has already been proposed.
+
+4. Understanding the Failure Modes of Out-of-Distribution Generalization
+1. Paper
+
+Understanding the Failure Modes of Out-of-Distribution Generalization — ICLR, 2021. 
+
+google-research/OOD-failures · GitHub
+
+2. ID of the paper
+
+ICLR 2021
+
+Paper ID: use the 
+official repository
+ to locate the associated paper and materials.
+
+3. What is it about?
+
+The paper investigates why models fail to generalise outside their training distribution. It studies the effects of geometric skews and statistical skews and examines how these affect learned decision boundaries. 
+
+google-research/OOD-failures · GitHub
+
+4. GitHub repo
+
+Code and experiments
+
+5. Future scopes and limitations
+
+Extend the analysis to deeper neural networks.
+
+Investigate more realistic distribution shifts.
+
+Study how architecture and training choices influence failure.
+
+Develop methods that identify likely generalisation failures before deployment.
+
+6. Feasibility and publication potential
+
+Feasibility: 8.5/10
+
+Research potential: 8/10
+
+Possible extension: Predicting Deep Neural Network Generalisation Failures under Distribution Shift.
+
+Use feature statistics, training curves and uncertainty measures to predict when a model will fail on unseen data.
+
+7. Have these limitations been overcome?
+
+Partially. OOD generalisation and failure prediction have been extensively studied since 2021. A new project should target a specific failure type or propose a measurable prediction method rather than merely reproduce the original analysis.
+
+5. Towards Training Reproducible Deep Learning Models
+1. Paper
+
+Towards Training Reproducible Deep Learning Models — ICSE, 2022. 
+
+arXiv
+
+2. ID of the paper
+
+arXiv: 2202.02326
+
+ICSE 2022
+
+3. What is it about?
+
+The paper studies why deep learning experiments may produce different results across runs or hardware. It proposes a framework combining record-and-replay and profile-and-patch techniques to control sources of randomness and non-determinism. The authors evaluated the approach on six open-source models and one commercial model. 
+
+arXiv
+
+4. GitHub repo
+
+Replication package
+
+5. Future scopes and limitations
+
+Reduce the runtime and storage overhead of reproducibility methods.
+
+Support more GPU architectures and deep learning frameworks.
+
+Handle distributed and multi-GPU training.
+
+Improve reproducibility across software versions and hardware environments.
+
+6. Feasibility and publication potential
+
+Feasibility: 7.5/10
+
+Research potential: 8/10
+
+Possible extension: Low-Overhead Reproducibility Auditing for Deep Learning.
+
+Build a tool that identifies which sources of randomness cause result variation and recommends the cheapest controls needed for reproducible experiments.
+
+7. Have these limitations been overcome?
+
+Partially. Reproducibility tools and deterministic execution options have improved, but hardware, software and distributed-training differences remain challenging. You would need to compare your approach against current PyTorch and TensorFlow reproducibility features.
+
+Final shortlist
+Rank
+
+Paper
+
+Suggested research direction
+
+Feasibility
+
+1
+
+Loss of Plasticity (2024)
+
+Adaptive neuron reinitialisation
+
+8/10
+
+2
+
+Spurious Correlation and OOD Detection (2022)
+
+Unknown-bias-aware OOD detection
+
+9/10
+
+3
+
+Deep Stable Learning (2021)
+
+Adaptive stable learning
+
+8.5/10
+
+4
+
+OOD Failure Modes (2021)
+
+Predicting model failures
+
+8.5/10
+
+5
+
+Reproducible Deep Learning (2022)
+
+Low-overhead reproducibility
+
+7.5/10
+
+My recommendation: Start by investigating Loss of Plasticity in Deep Continual Learning. It has a clear research question, an official implementation and measurable experimental outcomes. However, before selecting it, check the 2025–2026 literature for existing adaptive reinitialisation methods.
+
+These feasibility and publication ratings are preliminary judgements, not guarantees of acceptance. Publication depends on whether the final extension is genuinely novel, experimentally sound and meaningfully better than existing approaches.
+
+GNNs
+1. On the Bottleneck of Graph Neural Networks and Its Practical Implications
+1. Paper
+
+On the Bottleneck of Graph Neural Networks and Its Practical Implications — ICLR 2021. 
+
+arXiv
+
+2. ID of the paper
+
+- arXiv ID: 2006.05205
+
+3. What is the paper about?
+
+It studies over-squashing: when a GNN tries to compress information from many distant nodes into fixed-size representations, important information can be lost. The paper shows how graph bottlenecks limit long-range learning and investigates ways to alleviate them. 
+
+arXiv
+
+4. GitHub repo
+
+Official implementation
+
+5. Future scopes and limitations
+
+Potential extensions:
+
+Adapt graph connections based on the task instead of using fixed graph-rewiring rules.
+
+Reduce over-squashing without adding too many edges or increasing computation.
+
+Test on larger, real-world graphs.
+
+6. Feasibility and publication potential
+
+Feasibility: 8.5/10
+
+Research potential: 9/10
+
+Possible project: Learnable, Budget-Constrained Graph Rewiring for Long-Range GNN Tasks. Learn which extra edges help information flow while limiting the number of added edges.
+
+7. Have these limitations been overcome?
+
+Partially. Later methods explore graph rewiring, curvature and other ways to reduce over-squashing. The broad problem is well studied, so the contribution must be a demonstrably better rewiring strategy under a clear constraint. 
+
+ScienceDirect
+
+2. FoSR: First-Order Spectral Rewiring for Addressing Oversquashing in GNNs
+1. Paper
+
+FoSR: First-order spectral rewiring for addressing oversquashing in GNNs — ICLR 2023. (
+arXiv
+)
+
+2. ID of the paper
+
+- arXiv ID: 2210.11790
+
+3. What is the paper about?
+
+FoSR adds graph edges using spectral information to improve information flow. It targets over-squashing while using a relational architecture to preserve the original graph structure and avoid over-smoothing. (
+arXiv
+)
+
+4. GitHub repo
+
+Official implementation
+
+5. Future scopes and limitations
+
+Reduce the number of edges added without sacrificing accuracy.
+
+Adapt rewiring to each input graph and task.
+
+Improve scalability for very large graphs.
+
+Evaluate robustness when the original graph contains noisy edges.
+
+6. Feasibility and publication potential
+
+Feasibility: 8/10
+
+Research potential: 8.5/10
+
+Possible extension: Noise-Aware, Budget-Constrained Spectral Rewiring.
+
+7. Have these limitations been overcome?
+
+Partially. Later approaches, including spectral graph pruning, have explored reducing over-squashing and over-smoothing together. Therefore, a new method needs direct comparisons against these newer approaches. (
+NeurIPS 2024 implementation
+)
+
+3. GOOD: A Graph Out-of-Distribution Benchmark
+1. Paper
+
+GOOD: A Graph Out-of-Distribution Benchmark — NeurIPS 2022. (
+NeurIPS proceedings
+)
+
+2. ID of the paper
+
+arXiv ID: 2206.08452
+
+DOI: 10.52202/068431-0150
+
+3. What is the paper about?
+
+The authors developed a benchmark for evaluating GNNs when training and test graphs have different distributions. It distinguishes covariate shift from concept shift and provides 11 datasets with multiple distribution-shift settings. (
+NeurIPS proceedings
+)
+
+4. GitHub repo
+
+Official GOOD benchmark
+
+5. Future scopes and limitations
+
+Add more realistic distribution shifts.
+
+Improve generalisation to unseen graph domains.
+
+Investigate graph-specific shift detection.
+
+Develop adaptation methods that work when graph structure and node features both change.
+
+6. Feasibility and publication potential
+
+Feasibility: 9/10
+
+Research potential: 8.5/10
+
+Possible extension: Uncertainty-Aware Adaptation for Graph Distribution Shifts.
+
+Use the benchmark to compare a standard GNN, existing OOD methods and your adaptive method.
+
+7. Have these limitations been overcome?
+
+Partially. The benchmark has been extended with additional algorithms and newer graph-OOD research, including work published in 2023. The benchmark itself is not a novel contribution anymore; a new adaptation method or carefully justified evaluation protocol would be needed. (
+GOOD repository
+)
+
+4. Towards Multi-Grained Explainability for Graph Neural Networks
+1. Paper
+
+Towards Multi-Grained Explainability for Graph Neural Networks — NeurIPS 2021. (
+NeurIPS proceedings
+)
+
+2. ID of the paper
+
+NeurIPS 2021 paper
+
+NeurIPS paper ID: 99bcfcd754a98ce89cb86f73acc04645
+
+3. What is the paper about?
+
+The paper proposes ReFine, an explainer that combines global explanations across classes with explanations tailored to individual graph predictions. It uses pretraining followed by fine-tuning to produce explanations at multiple levels. (
+NeurIPS proceedings
+)
+
+4. GitHub repo
+
+Official ReFine implementation
+
+5. Future scopes and limitations
+
+Improve explanation faithfulness and stability.
+
+Reduce the cost of generating explanations.
+
+Test explanations under graph perturbations.
+
+Measure whether explanations remain consistent across similar graphs.
+
+6. Feasibility and publication potential
+
+Feasibility: 8.5/10
+
+Research potential: 8/10
+
+Possible extension: Robust GNN Explanations under Structural Perturbations.
+
+Test whether small changes to a graph cause large changes in its explanation, and propose a method to improve explanation stability.
+
+7. Have these limitations been overcome?
+
+Partially. Later methods, including D4Explainer (NeurIPS 2023), explored different ways to generate graph explanations. A project needs to compare against newer explainers, not just ReFine. (
+Research page and code links
+)
+
+My ranking for GNN research
+Rank
+
+Paper
+
+Potential extension
+
+Feasibility
+
+1
+
+On the Bottleneck of GNNs
+
+Budget-constrained graph rewiring
+
+8.5/10
+
+2
+
+GOOD benchmark
+
+Uncertainty-aware graph adaptation
+
+9/10
+
+3
+
+FoSR
+
+Noise-aware spectral rewiring
+
+8/10
+
+4
+
+ReFine
+
+Robust and stable explanations
+
+8.5/10
+
+My recommendation: Start with FoSR or the original bottleneck paper if you want a method-focused GNN project. Start with GOOD if you prefer benchmarking and comparing algorithms before developing your own method.
+
+One caution: these are promising starting points, not confirmed open research gaps. Before choosing, check the 2024–2026 papers and implementations in the exact subtopic, then select a limitation that remains unresolved.
+
+Neural networks
+1. Loss of Plasticity in Deep Continual Learning
+This is worth revisiting because it connects neural-network architecture, optimisation and the ability to keep learning over time.
+
+1. Paper
+
+Loss of Plasticity in Deep Continual Learning — Nature, 2024. 
+
+PMC
+
+2. ID of the paper
+
+DOI: 10.1038/s41586-024-07711-7
+
+Paper
+
+3. What is it about?
+
+The authors show that neural networks can gradually lose their ability to learn new information during continual training. They propose Continual Backpropagation, which periodically reinitialises a small fraction of less-useful units to preserve the network's learning capacity. 
+
+PMC
+
+4. GitHub repo
+
+Official implementation
+
+5. Future scopes and limitations
+
+Develop better ways to identify which neurons should be reinitialised.
+
+Preserve useful learned features while restoring learning capacity.
+
+Test on more architectures and real-world data streams.
+
+Study the trade-off between learning new tasks and retaining old knowledge.
+
+6. Feasibility and publication potential
+
+Feasibility: 8/10
+
+Research potential: 9/10
+
+Possible extension: Utility-Aware Neuron Reinitialisation for Continual Learning.
+
+7. Have these limitations been overcome?
+
+Partially. Research has explored the mechanisms behind plasticity loss and methods for preserving it. A 2023 study, for example, connected plasticity loss to changes in loss-landscape curvature. You must check newer adaptive reinitialisation methods before claiming a gap. 
+
+Proceedings of Machine Learning Research
++1
+
+2. Shortcut Learning in Deep Neural Networks
+1. Paper
+
+Shortcut Learning in Deep Neural Networks — Nature Machine Intelligence, 2020. 
+
+Nature Machine Intelligence
+
+2. ID of the paper
+
+DOI: 10.1038/s42256-020-00257-z
+
+Read paper
+
+3. What is it about?
+
+The paper explains how neural networks learn shortcuts that work on training and standard test data but fail in unfamiliar conditions. For example, a model may learn the background of an image instead of the actual object. 
+
+Nature Machine Intelligence
+
+4. GitHub repo
+
+Official supplementary code
+
+5. Future scopes and limitations
+
+Detect shortcut features automatically.
+
+Improve generalisation to unfamiliar environments.
+
+Measure whether models rely on meaningful features.
+
+Reduce shortcut learning without sacrificing accuracy.
+
+6. Feasibility and publication potential
+
+Feasibility: 9/10
+
+Research potential: 8.5/10
+
+Possible extension: Automatic Shortcut Detection and Suppression in Deep Neural Networks.
+
+7. Have these limitations been overcome?
+
+Partially. Many later methods address spurious correlations and robust generalisation, but eliminating shortcuts across different datasets and environments remains challenging. A specific method and comparison against recent baselines are necessary for a novel contribution. 
+
+Nature Machine Intelligence
+
+3. Calibrating Deep Neural Networks Using Focal Loss
+1. Paper
+
+Calibrating Deep Neural Networks using Focal Loss — NeurIPS 2020. 
+
+GitHub
+
+2. ID of the paper
+
+NeurIPS 2020
+
+Paper and publication details
+
+3. What is it about?
+
+Neural networks can be overconfident: a model may assign a high probability to an incorrect prediction. This paper studies using focal loss to improve the calibration of deep neural networks. 
+
+GitHub
+
+4. GitHub repo
+
+Official implementation
+
+5. Future scopes and limitations
+
+Improve calibration under distribution shift.
+
+Handle imbalanced datasets.
+
+Reduce the trade-off between calibration and classification accuracy.
+
+Improve reliability on unfamiliar examples.
+
+6. Feasibility and publication potential
+
+Feasibility: 9/10
+
+Research potential: 8/10
+
+Possible extension: Adaptive Loss Calibration for Neural Networks under Distribution Shift.
+
+7. Have these limitations been overcome?
+
+Partially. Many calibration methods now exist, including temperature scaling and other post-hoc approaches. Calibration under distribution shift remains a relevant research problem, but the proposed extension must be compared with modern calibration methods. 
+
+GitHub
+
+4. Understanding Plasticity in Neural Networks
+1. Paper
+
+Understanding Plasticity in Neural Networks — ICML 2023. 
+
+Proceedings of Machine Learning Research
+
+2. ID of the paper
+
+arXiv: 2303.01486
+
+Read paper
+
+3. What is it about?
+
+The paper investigates why neural networks lose the ability to adapt to new information during training. It connects plasticity loss with changes in the loss landscape and identifies optimisation and parameterisation choices that can help preserve learning capacity. 
+
+Proceedings of Machine Learning Research
+
+4. GitHub repo
+
+Paper's code and resources
+ — verify the relevant experiment files before choosing it.
+
+5. Future scopes and limitations
+
+Better understand the mechanisms causing plasticity loss.
+
+Test the findings on more architectures and tasks.
+
+Develop methods that adapt to plasticity loss automatically.
+
+Study the balance between retaining knowledge and learning new tasks.
+
+6. Feasibility and publication potential
+
+Feasibility: 8/10
+
+Research potential: 9/10
+
+Possible extension: Early Detection of Plasticity Loss Using Training Dynamics.
+
+7. Have these limitations been overcome?
+
+Partially. The 2024 Loss of Plasticity in Deep Continual Learning paper proposes Continual Backpropagation, so preserving plasticity already has established approaches. A new contribution should focus on early detection or a demonstrably more efficient adaptation strategy. 
+
+PMC
+
+5. Calibrating CNNs for Lifelong Learning
+1. Paper
+
+Calibrating CNNs for Lifelong Learning — NeurIPS 2020. 
+
+NeurIPS Papers
+
+2. ID of the paper
+
+NeurIPS 2020
+
+Read paper
+
+3. What is it about?
+
+The paper proposes calibrating CNN activation maps with small task-specific modules. The goal is to learn new tasks without forgetting old ones, while avoiding the need to store previous training examples. 
+
+NeurIPS Papers
+
+4. GitHub repo
+
+The paper's official code link was not verified in the sources checked. I would confirm code availability before committing to this paper.
+
+5. Future scopes and limitations
+
+Extend to more complex architectures.
+
+Reduce the growth of task-specific parameters.
+
+Support task-free continual learning.
+
+Improve adaptation when tasks overlap or change gradually.
+
+6. Feasibility and publication potential
+
+Feasibility: 7.5/10
+
+Research potential: 8/10
+
+Possible extension: Parameter-Efficient Continual Learning without Explicit Task IDs.
+
+7. Have these limitations been overcome?
+
+Partially. Prompt-based continual learning, parameter-efficient adaptation and replay-based methods have explored related problems. You would need a direct comparison with newer methods before claiming that task-free adaptation remains an open gap.
+
+My shortlist for neural-network research
+Rank
+
+Paper
+
+Promising direction
+
+Feasibility
+
+1
+
+Loss of Plasticity (2024)
+
+Adaptive neuron reinitialisation
+
+8/10
+
+2
+
+Shortcut Learning (2020)
+
+Automatic shortcut suppression
+
+9/10
+
+3
+
+Understanding Plasticity (2023)
+
+Early detection of learning degradation
+
+8/10
+
+4
+
+Focal Loss Calibration (2020)
+
+Calibration under distribution shift
+
+9/10
+
+5
+
+Calibrating CNNs for Lifelong Learning (2020)
+
+Task-free continual learning
+
+7.5/10
+
+My recommendation: Investigate Shortcut Learning if you want to study why neural networks fail, or Loss of Plasticity if you want to develop a new training algorithm.
+
+Neither direction is automatically novel. Before selecting a paper, verify the repository, reproduce the baseline, and check 2024–2026 follow-up work for the exact proposed extension.
+
+Name more topics
+Since you've already explored Responsible AI, LLMs, ML, DL, GNNs, and Neural Networks, here are more research areas to explore for your strategy: find a research paper (2020–2026) → reproduce its GitHub implementation → identify an unresolved limitation → extend it → publish.
+
+More AI/ML research topics
+Confidence Estimation for Neural Networks | AI Tutorial | Next Electronics
+1. Uncertainty Quantification
+
+Study how models estimate when their predictions may be wrong. Research directions include uncertainty under distribution shift, reliable confidence scores, and selective prediction.
+
+Difficulty: Medium–Hard
+
+In the Jungle of Federated Learning Frameworks
+2. Federated Learning
+
+Train models across multiple clients without centralising their raw data. Explore non-IID data, communication efficiency, client fairness, and privacy leakage.
+
+Difficulty: Medium–Hard
+
+Contrastive vs Supervised Learning | MetricGate
+3. Self-Supervised Learning
+
+Learn useful representations from unlabelled data. Explore data-efficient learning, representation collapse, and transfer to unfamiliar domains.
+
+Difficulty: Medium–Hard
+
+Hara Lab — UTokyo
+4. Causal Machine Learning
+
+Go beyond correlations to investigate causal relationships. Potential areas include causal representation learning, invariant prediction, and counterfactual reasoning.
+
+Difficulty: Hard
+
+Model Compression Techniques: Quantization, Pruning, and Knowledge Distillation Made Simple and Practical | by Abduldattijo | ILLUMINATION | Medium
+5. Model Compression and Efficient Learning
+
+Make deep models smaller and faster using pruning, quantisation, knowledge distillation, and efficient architectures.
+
+Difficulty: Medium–Hard
+
+A Novel Cluster Matching-Based Improved Kernel Fisher Criterion for Image Classification in Unsupervised Domain Adaptation | MDPI
+6. Domain Adaptation and Transfer Learning
+
+Adapt a model trained on one domain to another with different data characteristics. Investigate label scarcity, domain shifts, and negative transfer.
+
+Difficulty: Medium–Hard
+
+Bringing robustness against adversarial attacks | Nature Machine Intelligence
+7. Adversarial Machine Learning
+
+Study how small, deliberately designed input changes affect models and how to improve robustness. This includes adversarial training and robustness evaluation.
+
+Difficulty: Hard
+
+Explainable AI (XAI): Are we there yet? » Artificial Intelligence - MATLAB & Simulink
+8. Explainable AI (XAI)
+
+Investigate whether explanations reflect the model's actual decision process. Potential gaps include explanation stability, faithfulness, and robustness to input changes.
+
+Difficulty: Medium–Hard
+
+Catastrophic Forgetting in AI — The phenomenon everyone forgets. | by Aryankkate | Mar, 2026 | Medium
+9. Continual and Lifelong Learning
+
+Enable models to learn new tasks while retaining previous knowledge. Research includes catastrophic forgetting, memory selection, and loss of plasticity.
+
+Difficulty: Medium–Hard
+
+Anomaly Detection Examples - fusionlab-learn 0.3.0 documentation
+10. Time-Series Representation Learning
+
+Study how neural models learn temporal patterns, handle missing observations, and generalise across changing time-series distributions.
+
+Difficulty: Medium–Hard
+
+Day 69/100: Multimodal Learning in Practice — Teaching Machines to See, Read, and Listen Together | by Sebastian Buzdugan | Medium
+11. Multimodal Learning
+
+Study models that combine text, images, audio, or video. Explore missing modalities, conflicting information, modality imbalance, and robust fusion.
+
+Difficulty: Hard
+
+Regularized Evolution for Image Classifier Architecture Search | MYRIAD
+12. Neural Architecture Search (NAS)
+
+Automatically discover neural-network architectures. Explore search efficiency, hardware-aware models, and architecture generalisation.
+
+Difficulty: Hard
+
+From Moon Landings to Medicine: How Deep Q-Learning is Shaping the Future of Healthcare
+13. Reinforcement Learning
+
+Study how agents learn through interaction. Research directions include sample efficiency, offline RL, reward design, and safe exploration.
+
+Difficulty: Hard
+
+Unlocking High-Accuracy Differentially Private Image Classification through Scale — Google DeepMind
+14. Privacy-Preserving Machine Learning
+
+Investigate differential privacy, private training, membership-inference attacks, and the trade-off between privacy and model utility.
+
+Difficulty: Medium–Hard
+
+TorchEBM - Energy-Based Modeling in PyTorch - TorchEBM
+15. Generative Modelling Beyond LLMs
+
+Explore diffusion models, normalising flows, energy-based models, and generative modelling efficiency, controllability, and evaluation.
+
+Difficulty: Hard
+
+Deep learning on dynamic graphs
+16. Temporal and Dynamic Graph Learning
+
+Extend graph learning to evolving networks. Investigate temporal link prediction, concept drift, graph changes, and adaptation to new nodes.
+
+Difficulty: Hard
+
+Which should you explore first?
+Based on your aim of reproducing a paper and publishing a research extension, I would prioritise these five for further investigation—not as guaranteed open gaps, but as promising research areas.
+
+Priority
+
+Topic
+
+Why investigate it?
+
+1
+
+Uncertainty quantification
+
+Clear metrics and measurable reliability improvements
+
+2
+
+Continual learning
+
+Natural extensions around memory, forgetting, and plasticity
+
+3
+
+Domain adaptation
+
+Well-defined benchmarks and testable generalisation gaps
+
+4
+
+Federated learning
+
+Strong privacy, communication, and non-IID research questions
+
+5
+
+Model compression
+
+Quantifiable accuracy, latency, memory, and energy trade-offs
+
+You have already explored several broad areas, so the next step should be to choose a research subfield, not just another project category.
+
+Which one should I investigate next using your seven-point paper format?
+
+give top 15 among all ideas
+
+Worked for 11s
+Top 15 research directions across all the topics
+For your final-year project, I’m ranking ideas based on research potential, availability of reproducible code, feasibility for a student, measurable improvement, and the likelihood that a meaningful gap remains. I’m also accounting for your preference to avoid routine prediction projects, basic chatbots, and simple API wrappers.
+
+One important finding from checking the literature: some apparently promising ideas have already advanced substantially. For example, loss of plasticity now has several 2025–2026 follow-up methods, so the original paper alone is not enough to establish a novel contribution. 
+
+Proceedings of Machine Learning Research
++3
+
+These rankings are my preliminary assessment, not a guarantee that a paper's limitations remain unresolved or that a project will be published.
+
+Ranked shortlist
+Ranked for your paper → reproduction → research extension → publication workflow. The gap-status column indicates how much further literature checking is needed, not proof of novelty.
+
+01
+Best starting point
+Capability-independent AI safety evaluation
+
+Area: Responsible AI · Evaluation
+
+Research idea: Design tests that distinguish genuine safety improvements from improvements caused by general model capability.
+
+Starting paper: 
+Safetywashing (2024)
+ · 
+GitHub
+
+Feasibility: 9/10 · Gap status: Needs focused review
+
+02
+Cost-aware LLM hallucination detection
+
+Area: LLMs · Reliability
+
+Research idea: Dynamically decide how many answer samples to generate based on uncertainty, balancing detection quality against inference cost.
+
+Starting paper: 
+SelfCheckGPT (2023)
+ · 
+GitHub
+
+Feasibility: 9/10 · Gap status: Crowded; verify newer methods
+
+03
+Adaptive learning under concept drift
+
+Area: Machine Learning · Online learning
+
+Research idea: Detect when data behaviour changes and adapt the model without retraining from scratch unnecessarily.
+
+Starting paper: 
+AMRC for Concept Drift (ICML 2022)
+
+Feasibility: 9/10 · Gap status: Specific adaptation method needs review
+
+04
+Uncertainty-aware graph adaptation
+
+Area: GNNs · Robustness
+
+Research idea: Detect unfamiliar graph distributions and adapt predictions using uncertainty estimates.
+
+Starting paper: 
+GOOD benchmark (2022)
+
+Feasibility: 8.5/10 · Gap status: Active research area
+
+05
+Budget-constrained graph rewiring
+
+Area: GNNs · Graph representation learning
+
+Research idea: Add only the most useful graph connections to reduce over-squashing without excessive computation.
+
+Starting paper: 
+On the Bottleneck of GNNs (ICLR 2021)
+ · 
+GitHub
+
+Feasibility: 8/10 · Gap status: Many follow-up methods exist
+
+06
+Continual learning without plasticity loss
+
+Area: Neural networks · Continual learning
+
+Research idea: Identify when a network loses its ability to learn new tasks and adapt its training procedure.
+
+Starting paper: 
+Loss of Plasticity (Nature 2024)
+ · 
+GitHub
+
+Feasibility: 8/10 · Gap status: Crowded; major 2025–2026 follow-ups
+
+07
+Robust explanations for GNN predictions
+
+Area: Explainable AI · GNNs
+
+Research idea: Make graph explanations remain consistent when small, irrelevant changes are made to the input graph.
+
+Starting paper: 
+Towards Multi-Grained Explainability for GNNs (2021)
+ · 
+ReFine code
+
+Feasibility: 8.5/10 · Gap status: Requires comparisons with newer explainers
+
+08
+Reliable LLM reasoning and search
+
+Area: LLMs · AI agents
+
+Research idea: Improve when an agent should search for more evidence, answer, or abstain because evidence is insufficient.
+
+Starting paper: 
+BAPO (ACL Findings 2026)
+ · Search the title Boundary-Aware Policy Optimization for Reliable Agentic Search
+
+Feasibility: 7.5/10 · Gap status: Very recent; verify exact code and follow-ups
+
+09
+Multimodal inconsistency detection
+
+Area: Multimodal AI · Reliability
+
+Research idea: Detect contradictions between text and images, then investigate whether external evidence or targeted verification improves detection.
+
+Starting paper: 
+MMIR (ACL Findings 2025)
+ · Search the title Multimodal Inconsistency Reasoning
+
+Feasibility: 7.5/10 · Gap status: Verify repository and recent competing methods
+
+10
+OOD generalisation through invariant learning
+
+Area: ML · Deep learning
+
+Research idea: Improve performance when the relationship between training features and labels changes in unseen environments.
+
+Starting paper: 
+Fishr (ICML 2022)
+ · 
+GitHub
+
+Feasibility: 8/10 · Gap status: Mature, active literature
+
+11
+Fairness without demographic labels
+
+Area: Responsible AI · Fair ML
+
+Research idea: Improve worst-group performance when protected-group labels are missing or unavailable.
+
+Starting paper: 
+Fairness without Demographics (NeurIPS 2020)
+ · 
+GitHub
+
+Feasibility: 8.5/10 · Gap status: Needs specific subgroup/shift focus
+
+12
+Efficient LLM retrieval and reasoning
+
+Area: LLM systems · Retrieval
+
+Research idea: Dynamically decide when retrieval is useful and how much evidence to retrieve, rather than always performing the same pipeline.
+
+Starting paper: 
+RAGGED (ICML 2025)
+ · Search the title Towards Informed Design of Scalable and Stable RAG Systems
+
+Feasibility: 8/10 · Gap status: Active area; avoid a generic RAG extension
+
+13
+Cost-aware neural ensemble selection
+
+Area: Deep learning · Uncertainty
+
+Research idea: Select a small subset of models dynamically to maintain prediction quality while reducing inference cost.
+
+Starting paper: 
+Neural Ensemble Search
+
+Feasibility: 8/10 · Gap status: Dynamic selection is established; refine the objective
+
+14
+Shortcut detection in deep neural networks
+
+Area: DL · Robustness
+
+Research idea: Detect when a network relies on spurious features and suppress them without reducing useful predictive information.
+
+Starting paper: 
+Shortcut Learning (2020)
+ · 
+Supplementary code
+
+Feasibility: 8.5/10 · Gap status: Mature field; needs a precise setting
+
+15
+Reproducibility auditing for deep learning
+
+Area: ML systems · Research tooling
+
+Research idea: Automatically identify sources of run-to-run variation and reduce the cost of reproducible experiments.
+
+Starting paper: 
+Towards Training Reproducible Deep Learning Models (ICSE 2022)
+ · 
+Replication package
+
+Feasibility: 7.5/10 · Gap status: Compare with current framework capabilities
+
+My final recommendation
+Don't select a paper solely because it has a high feasibility score. The most important question is whether you can demonstrate a specific, measurable improvement over a strong baseline.
+
+My top three to investigate first would be:
+
+1. Adaptive concept-drift learning
+
+A clear experimental setup, manageable compute requirements, and measurable performance over time.
+
+2. Capability-independent safety evaluation
+
+A strong Responsible AI question, with potential to contribute a better evaluation method rather than another application.
+
+3. Budget-constrained graph rewiring
+
+A method-focused GNN project with measurable trade-offs between predictive performance, graph size and computational cost.
+
+Next step: shortlist three candidates, then audit their full papers, repositories, datasets and 2024–2026 follow-up work. Only after that should we commit to one research gap.
+
+out of these.. how many of these are actually implementable.. rate it on a strict basis and rank top 15
+
+Responsible AI
+Yes. For Responsible AI, I would not mix in general LLM papers yet. I found several papers from 2020–2026 with usable code and potential research extensions.
+
+I’m ranking them roughly by research potential + feasibility for your B.Tech project.
+
+1. Safetywashing: Do AI Safety Benchmarks Actually Measure Safety Progress?
+1. Paper
+Safetywashing: Do AI Safety Benchmarks Actually Measure Safety Progress? — NeurIPS 2024. 
+
+2. ID of the paper
+arXiv: 2407.21792
+DOI: 10.52202/079017-2190 
+
+3. What is the paper about and what did they discuss/propose?
+The paper asks a very important question:
+
+Do AI safety benchmarks actually measure safety, or are they simply measuring how capable a model is?
+
+They analyzed many safety benchmarks and compared them with general model capabilities.
+
+They found that many "safety" benchmarks are strongly correlated with model capability and scale. So a model can appear safer simply because it became more capable.
+
+They call this problem "safetywashing."
+
+4. GitHub repo
+GitHub — Safetywashing 
+
+5. Future scopes and limitations
+
+The paper's main limitation is that the analysis depends on the existing safety benchmarks.
+
+They suggest:
+
+creating safety benchmarks less correlated with general capabilities
+reporting correlation with model capabilities for new safety benchmarks
+finding benchmarks that measure a genuinely separate safety property
+studying safety areas not covered by their analysis 
+6. Feasibility of implementing that scope + publishing?
+
+Very high — 9/10
+
+You don't need to train an LLM.
+
+Possible project:
+
+"Capability-Independent Evaluation of LLM Safety Benchmarks"
+
+You could:
+
+select 10–20 safety benchmarks
+evaluate several open-source LLMs
+measure capability vs safety correlation
+introduce new evaluation dimensions
+design a decorrelated safety benchmark
+compare it with existing benchmarks
+This is particularly suitable if you want a research-oriented project rather than a normal application.
+
+7. Have those limitations/future scopes already been overcome?
+
+Partially.
+
+There has been substantial work on better safety evaluation since 2024, but the fundamental problem identified by Safetywashing is not completely solved.
+
+The paper itself argues that many existing benchmarks remain entangled with general capability. 
+
+My rating
+Research potential: 9.5/10
+Implementation: 8.5/10
+Publication potential: 9/10 ⭐
+
+2. Fairness without Demographics through Adversarially Reweighted Learning
+1. Paper
+Fairness without Demographics through Adversarially Reweighted Learning — NeurIPS 2020. 
+
+2. ID of the paper
+arXiv: 2006.13114
+
+3. What is the paper about and what did they discuss/propose?
+
+Traditional fairness methods often need protected attributes such as:
+
+gender
+race
+age
+But sometimes these attributes cannot legally or practically be collected.
+
+The paper proposes Adversarially Reweighted Learning (ARL).
+
+The idea is to use non-protected features and labels to identify groups that may be receiving poor performance and then reweight the training process toward those groups.
+
+The authors report improvements in worst-case group performance without explicitly knowing group membership. 
+
+4. GitHub repo
+GitHub — ARL implementation 
+
+5. Future scopes and limitations
+
+Interesting limitations to investigate:
+
+performance depends on how well the adversary identifies disadvantaged regions/groups
+fairness is evaluated mainly through particular datasets and fairness measures
+hidden/proxy groups may not always correspond to meaningful protected groups
+fairness–accuracy trade-offs remain
+6. Feasibility
+
+Very high — 9/10
+
+A strong extension would be:
+
+Adaptive Adversarial Fairness under Distribution Shift
+
+Instead of assuming the data distribution stays fixed:
+
+Train → distribution changes → hidden disadvantaged group appears → fairness model adapts.
+
+You could compare:
+
+ERM
+ARL
+your adaptive ARL
+Metrics:
+
+accuracy
+worst-group accuracy
+fairness gap
+robustness under distribution shift
+This is quite manageable with Python/PyTorch.
+
+7. Have the limitations been overcome?
+
+Partially.
+
+There is considerable later research on:
+
+subgroup robustness
+fairness without demographic information
+distribution shift
+minimax fairness
+So you cannot simply claim "fairness without demographics is unsolved."
+
+However, combining it with dynamic distribution shift / unseen subgroups / adaptive fairness still gives research space.
+
+My rating
+Research potential: 8.5/10
+Implementation: 9/10
+Publication potential: 8.5/10
+
+3. Blind Pareto Fairness and Subgroup Robustness
+1. Paper
+Blind Pareto Fairness and Subgroup Robustness — ICML 2021. 
+
+2. ID of the paper
+PMLR: 139:7492–7501
+ICML 2021. 
+
+3. What is the paper about and what did they discuss/propose?
+
+Most fairness algorithms protect known groups:
+
+gender = female/male
+age = young/old
+race = group A/B
+
+The problem is that we may not know which groups will be disadvantaged.
+
+This paper proposes Blind Pareto Fairness (BPF).
+
+It tries to reduce the worst-case risk of any sufficiently large subgroup, without explicitly knowing the protected groups beforehand. 
+
+4. GitHub repo
+
+GitHub — BlindParetoFairness 
+
+5. Future scopes and limitations
+
+Possible limitations to investigate:
+
+computational cost of searching over possible subgroups
+definition of what constitutes a sufficiently large subgroup
+performance on larger/deeper models
+behaviour under distribution shift
+whether worst-case subgroup protection hurts overall utility
+6. Feasibility
+
+High — 8.5/10
+
+A good extension:
+
+Distribution-Shift-Aware Blind Fairness
+
+Test BPF when the data distribution changes between training and deployment.
+
+For example:
+
+Training distribution
+       ↓
+Fair model
+       ↓
+New unseen population
+       ↓
+New disadvantaged subgroup
+       ↓
+Adaptive fairness mechanism
+This gives you a much stronger research story than simply reproducing BPF.
+
+7. Have those limitations been overcome?
+
+Partially.
+
+There is significant later work on:
+
+subgroup robustness
+distributionally robust optimization
+minimax fairness
+adaptive fairness
+But the combination of unknown subgroup + distribution shift + fairness adaptation remains a reasonable research direction.
+
+My rating
+Research potential: 9/10
+Implementation: 8/10
+Publication potential: 9/10 ⭐
+
+4. Algorithmic Decision Making with Conditional Fairness
+1. Paper
+Algorithmic Decision Making with Conditional Fairness — KDD 2020. 
+
+2. ID of the paper
+DOI: 10.1145/3394486.3403263
+KDD 2020. 
+
+3. What is the paper about and what did they discuss/propose?
+
+The paper studies fairness in decision-making systems where fairness should depend on conditions/context, rather than applying one simple fairness rule to everyone.
+
+It proposes a conditional fairness framework and studies the trade-off between fairness and predictive performance.
+
+4. GitHub repo
+
+GitHub — DCFR 
+
+5. Future scopes and limitations
+
+Potential directions:
+
+conditional fairness under distribution shift
+multiple sensitive attributes
+fairness for more complex/deep models
+dynamic decision-making
+better fairness–accuracy trade-offs
+6. Feasibility
+
+High — 8.5/10
+
+You could extend it to:
+
+Conditional Fairness under Changing Data Distributions
+
+Experiment with:
+
+static data
+shifted data
+unseen groups
+multiple sensitive attributes
+Then compare fairness and accuracy before/after adaptation.
+
+7. Have those limitations been overcome?
+
+Partially.
+
+Conditional fairness, intersectional fairness and distributionally robust fairness have received substantial follow-up research.
+
+So the original gap is not completely untouched. You would need to identify a more specific unresolved combination rather than simply "improve conditional fairness."
+
+My rating
+Research potential: 8/10
+Implementation: 9/10
+Publication potential: 8/10
+
+5. Fairness through Experimentation: Inequality in A/B Testing as an Approach to Responsible Design
+1. Paper
+Fairness through Experimentation: Inequality in A/B Testing as an Approach to Responsible Design — 2020. 
+
+2. ID of the paper
+arXiv: 2002.05819
+
+3. What is the paper about and what did they discuss/propose?
+
+Instead of asking:
+
+"Is my ML model fair?"
+
+the paper asks:
+
+"Does deploying this product/algorithm actually improve or worsen inequality among users?"
+
+They introduce an inequality-based approach to A/B testing using the Atkinson index.
+
+They also propose site-wide inequality impact, which measures how experimentation affects different populations.
+
+The work was tested using real LinkedIn experimentation data. 
+
+4. GitHub repo
+
+The paper reports an open-source scalable implementation in Spark/Scala, but I did not find a clearly identifiable official author GitHub repository in the sources I checked.
+
+So I would mark this as:
+
+Official GitHub: Not clearly verified
+
+This is a disadvantage compared with the previous papers.
+
+5. Future scopes and limitations
+
+Interesting extensions:
+
+fairness-aware A/B testing for ML systems
+fairness monitoring after deployment
+long-term inequality measurement
+intersectional groups
+online/dynamic fairness monitoring
+6. Feasibility
+
+7.5/10
+
+Technically feasible, but reproducing the original large-scale LinkedIn environment is difficult.
+
+A student project would need to create a simulated experimentation environment or use a public dataset.
+
+7. Have the limitations been overcome?
+
+Partially.
+
+Fairness-aware experimentation has continued to develop, but long-term effects of algorithmic decisions and inequality are still difficult to measure.
+
+My rating
+Research potential: 8/10
+Implementation: 7/10
+Publication potential: 7.5/10
+
+My shortlist for YOU
+If I were selecting specifically for your final-year project + research paper + GitHub reproduction, I would narrow Responsible AI down to:
+
+Rank	Paper	Research potential	Feasibility
+🥇	Safetywashing — 2024	⭐⭐⭐⭐⭐	⭐⭐⭐⭐
+🥈	Blind Pareto Fairness — 2021	⭐⭐⭐⭐⭐	⭐⭐⭐⭐
+🥉	Fairness without Demographics — 2020	⭐⭐⭐⭐½	⭐⭐⭐⭐⭐
+4	Conditional Fairness — 2020	⭐⭐⭐⭐	⭐⭐⭐⭐⭐
+5	Fairness through Experimentation — 2020	⭐⭐⭐⭐	⭐⭐⭐½
+One important observation
+For your particular strategy — "take an existing paper → reproduce → identify a real gap → extend → publish" — I would not choose Data Cards / Model Cards as the main project. They are excellent Responsible AI concepts, but they are more framework/documentation oriented and give you less room for a strong ML experiment. Data Cards, for example, focus on structured documentation of dataset origins, collection, intended use, evaluation and lifecycle. 
+
+The Safetywashing paper is particularly interesting because the research question itself is strong:
+
+"Are we actually improving AI safety, or are we just improving model capability?"
+
+And its authors explicitly identify the need for better, capability-independent safety benchmarks. 
+
+That is a much more research-oriented direction than building another "Responsible AI dashboard."
+
+Safetywashing paper · Safetywashing GitHub
+
+next topic
+Sure. What topic do you want next?
+
+For example:
+
+LLMs
+Machine Learning (ML)
+Deep Learning (DL)
+GNNs
+AI Safety
+I'll cover only that one topic in the same 7-point format.
+
+LLMs
+LLMs
+I’m keeping this to LLM-specific papers from 2020–2026, with emphasis on papers that have a realistic research extension.
+
+1. Paper
+TruthfulQA: Measuring How Models Mimic Human Falsehoods — 2022. 
+
+2. ID of the paper
+ACL Anthology ID: 2022.acl-long.229
+arXiv: 2109.07958
+
+3. What is the paper about and what did they discuss/propose?
+The paper studies whether LLMs give truthful answers or reproduce common human misconceptions.
+
+They created the TruthfulQA benchmark and tested several language models.
+
+An important finding was that larger models were not necessarily more truthful. The authors suggested that simply scaling models is not enough and that different training objectives may be needed. 
+
+4. GitHub repo
+TruthfulQA GitHub
+
+5. Future scopes and limitations
+Possible research directions:
+
+multilingual truthfulness
+truthfulness under adversarial prompts
+domain-specific truthfulness
+dynamic/up-to-date truthfulness
+combining truthfulness with uncertainty estimation
+The benchmark itself has also required updates: in 2025, the authors added a new multiple-choice setting and removed some outdated questions. 
+
+6. Feasibility of implementing that scope + publishing
+9/10
+
+Very feasible.
+
+A strong project could be:
+
+Truthfulness Evaluation of LLMs under Adversarial and Temporal Questions
+
+You could test whether an LLM knows when it doesn't know rather than forcing an answer.
+
+7. Have those limitations/future scopes been overcome?
+Partially.
+
+A lot of later work has improved truthfulness evaluation, but the fundamental problem is not solved. The fact that TruthfulQA itself needed updates in 2025 shows that static truthfulness benchmarks have limitations. 
+
+Research potential: 8.5/10
+
+2. SelfCheckGPT: Zero-Resource Black-Box Hallucination Detection for Generative Large Language Models
+1. Paper
+SelfCheckGPT: Zero-Resource Black-Box Hallucination Detection for Generative Large Language Models — 2023. 
+
+2. ID of the paper
+arXiv: 2303.08896
+EMNLP 2023
+
+3. What is the paper about and what did they discuss/propose?
+The paper proposes detecting hallucinations without accessing the LLM's internal probabilities or external knowledge bases.
+
+The main idea:
+
+Same question
+     ↓
+Generate multiple answers
+     ↓
+Compare answers
+     ↓
+High disagreement → possible hallucination
+They tested several approaches including BERTScore, NLI, QA and n-gram consistency. 
+
+4. GitHub repo
+SelfCheckGPT GitHub
+
+The repository contains implementations of the different SelfCheck approaches. 
+
+5. Future scopes and limitations
+Main opportunities:
+
+reduce the number of samples required
+multilingual hallucination detection
+better uncertainty estimation
+combine black-box and white-box signals
+reduce inference cost
+improve detection for reasoning-heavy answers
+6. Feasibility
+9.5/10
+
+This is one of the best choices for your project.
+
+A possible extension:
+
+Adaptive Self-Consistency Hallucination Detection
+
+Instead of always generating 10 samples:
+
+Start with 2 samples
+       ↓
+Measure disagreement
+       ↓
+If uncertain → generate more
+       ↓
+Otherwise stop
+This can reduce API/model cost while maintaining detection performance.
+
+7. Have those limitations/future scopes been overcome?
+Partially, but this is important:
+
+There are already extensions of SelfCheckGPT. For example, later work has explored ensemble methods, cross-lingual evaluation, uncertainty signals and retrieval-based consistency. 
+
+So don't simply reproduce SelfCheckGPT.
+
+But adaptive sampling/cost-aware hallucination detection is still a possible research direction.
+
+Research potential: 9.5/10
+Feasibility: 9.5/10 ⭐
+
+3. HaluEval: A Large-Scale Hallucination Evaluation Benchmark for Large Language Models
+1. Paper
+HaluEval: A Large-Scale Hallucination Evaluation Benchmark for Large Language Models — EMNLP 2023. 
+
+2. ID of the paper
+ACL Anthology ID: 2023.emnlp-main.397
+DOI: 10.18653/v1/2023.emnlp-main.397
+
+3. What is the paper about and what did they discuss/propose?
+HaluEval is a benchmark for testing whether LLMs can recognize hallucinated answers.
+
+It contains around 35K hallucination examples, covering:
+
+question answering
+knowledge-grounded dialogue
+summarization
+general user queries
+The authors used a ChatGPT-based generation/filtering process plus human annotation. 
+
+4. GitHub repo
+HaluEval GitHub
+
+The repository provides the dataset, generation code, evaluation code and analysis code. 
+
+5. Future scopes and limitations
+Potential extensions:
+
+multilingual hallucination evaluation
+domain-specific hallucination
+long-context hallucination
+reasoning hallucination
+real-world user queries
+dynamic benchmarks that don't become outdated
+6. Feasibility
+9/10
+
+A good extension:
+
+Adaptive Hallucination Benchmark for Long-Context LLMs
+
+Test whether hallucinations increase when:
+
+context becomes longer
+relevant information is buried in the middle
+conflicting documents are provided
+irrelevant documents are added
+Then develop a new evaluation metric.
+
+7. Have those limitations/future scopes been overcome?
+Partially.
+
+Many newer benchmarks now target specific hallucination problems.
+
+For example, HalluLens (2025) dynamically generates evaluation data so future LLMs cannot simply overfit to a fixed test set. 
+
+Therefore, "build another hallucination benchmark" is already crowded.
+
+However, a benchmark specifically targeting long-context + conflicting evidence + adaptive difficulty could still be interesting.
+
+Research potential: 8.5/10
+
+4. HaloScope: Harnessing Unlabeled LLM Generations for Hallucination Detection
+1. Paper
+HaloScope: Harnessing Unlabeled LLM Generations for Hallucination Detection — 2024. 
+
+2. ID of the paper
+arXiv: 2409.17504
+NeurIPS 2024
+
+3. What is the paper about and what did they discuss/propose?
+The problem:
+
+Training a hallucination detector normally requires lots of labelled hallucinated/truthful examples.
+
+HaloScope proposes using unlabelled LLM generations from the real world.
+
+It estimates which generations are likely truthful/untruthful and uses them to train a hallucination detector. 
+
+4. GitHub repo
+HaloScope GitHub
+
+The repository contains the implementation and model preparation/evaluation code. 
+
+5. Future scopes and limitations
+Potential directions:
+
+multilingual detection
+domain-specific detection
+better pseudo-label generation
+detecting reasoning hallucinations
+detecting hallucinations in long-context LLMs
+reducing dependence on large models for the detector
+6. Feasibility
+8.5/10
+
+A realistic extension:
+
+Confidence-Aware HaloScope
+
+Instead of treating every pseudo-label equally:
+
+LLM generation
+      ↓
+Pseudo-label
+      ↓
+Confidence estimation
+      ↓
+High-confidence → training
+Low-confidence → discard/recheck
+Then test whether better pseudo-label filtering improves hallucination detection.
+
+7. Have those limitations/future scopes been overcome?
+Partially.
+
+There is already substantial work on:
+
+self-supervised hallucination detection
+uncertainty-based detection
+unlabeled-data learning
+external verification
+So the general idea is not untouched.
+
+But combining pseudo-label confidence + multilingual/long-context evaluation can still provide a research direction.
+
+Research potential: 8.5/10
+
+5. HalluLens: LLM Hallucination Benchmark
+1. Paper
+HalluLens: LLM Hallucination Benchmark — 2025. 
+
+2. ID of the paper
+arXiv: 2504.17550
+
+3. What is the paper about and what did they discuss/propose?
+The paper focuses on evaluating textual hallucination in LLMs.
+
+A major idea is to dynamically generate evaluation data, instead of using a fixed benchmark that future models may have seen during training.
+
+It covers:
+
+factual hallucination
+long-form hallucination
+nonexistent entities
+refusal behaviour
+The repository provides evaluation scripts for these tasks. 
+
+4. GitHub repo
+HalluLens GitHub
+
+5. Future scopes and limitations
+Possible directions:
+
+adaptive benchmark difficulty
+multilingual hallucination
+reasoning hallucination
+multimodal hallucination
+domain-specific evaluation
+benchmark robustness against benchmark gaming
+6. Feasibility
+8/10
+
+You could build:
+
+Adaptive Hallucination Stress Testing for LLMs
+
+The benchmark automatically increases difficulty based on the model's previous performance.
+
+Example:
+
+Easy question
+     ↓
+Model succeeds
+     ↓
+Increase difficulty
+     ↓
+Conflicting information
+     ↓
+Temporal information
+     ↓
+Adversarial question
+7. Have those limitations/future scopes been overcome?
+Somewhat.
+
+This is a very recent paper, so fewer limitations have been thoroughly explored.
+
+But the general hallucination-benchmark area is already extremely active: HaluEval, HalluLens, HaloScope, Hallu-PI, HallusionBench, etc. 
+
+Therefore, I would not choose HalluLens simply to create another benchmark.
+
+Research potential: 8/10
+
+My ranking for your project
+Rank	Paper	Research potential	Feasibility	Gap status
+🥇	SelfCheckGPT — 2023	9.5/10	9.5/10	🟢 Some gaps remain
+🥈	TruthfulQA — 2022	8.5/10	9/10	🟢 Still relevant
+🥉	HaluEval — 2023	8.5/10	9/10	🟡 Crowded
+4	HaloScope — 2024	8.5/10	8.5/10	🟡 Partially addressed
+5	HalluLens — 2025	8/10	8/10	🟡 Very active area
+If your goal is paper + GitHub reproduction + genuine extension + publication
+I'd investigate SelfCheckGPT first.
+
+The particularly interesting research question is:
+
+Can we make hallucination detection adaptive so that the LLM generates only as many samples as necessary?
+
+That gives you a measurable contribution: hallucination detection accuracy vs number of samples vs inference cost.
+
+And importantly, I would not present "hallucination detection" itself as your novelty. That area is already crowded. The novelty needs to come from the specific unresolved limitation you identify after checking the later literature. 
+

@@ -1,0 +1,34 @@
+Final Year Project Ideas:
+
+1. 
+Graph neural networks for fraud rings or citation and knowledge-graph analysis
+
+2. 
+Applied AI / NLP: Controlled Synthetic Data Generator for Extreme Imbalance Scenarios
+The Gap: Real-world NLP and tabular classification datasets frequently suffer from extreme class imbalances (e.g., 99.5% normal vs 0.5% critical anomaly), where SMOTE fails to capture non-linear relationships.
+
+The Project: A hybrid synthetic data engine combining conditional Tabular Variational Autoencoders (CT-VAE) and instruction-tuned generative models for tabular/text hybrid records.
+
+3.
+GraGOD, "GNNs for Time Series Anomaly Detection." It offers an open-source framework for reproducible experiments across datasets, graph structures and evaluation strategies, and evaluates several GNN architectures against baselines on two real-world datasets. Its first experiment used only a fully connected graph topology, so testing other graph structures or more datasets is a clear extension.
+
+Links: 
+i) https://arxiv.org/html/2603.09675
+
+
+4.
+ TabM — Parameter-Efficient Deep Ensembles for Tabular DataPaper: "TabM: Advancing Tabular Deep Learning with Parameter-Efficient Ensembling" (Gorishniy et al., ICLR 2025).Official Repo: yandex-research/tabm (also packaged on PyPI as pip install tabm).Compute Footprint: Very Low. Trains in 1–5 minutes per dataset on a free Colab T4 GPU (or CPU for small datasets). Uses parameter-efficient BatchEnsemble/MiniEnsemble layers, requiring negligible extra VRAM over a single MLP.The Method: Solves the long-standing problem of Tree-based models (XGBoost/CatBoost) beating Deep Learning on tabular data. TabM trains $k$ implicit sub-models simultaneously with shared backbone weights, producing multiple predictions per forward pass.Visible Gap & OpenReview Critique:The Limitation: In the paper, the $k$ sub-predictions are simply averaged uniformly at inference time. The authors and OpenReview reviewers noted that individual sub-models overfit to specific feature subspaces, and the uniform mean does not weight uncertain sub-models down.Your Proposed Extension (Paper Angle): Replace naive uniform averaging with an Uncertainty-Weighted Evidential Gating Layer (or entropy-weighted mixture). Demonstrate on OpenML benchmarks that pruning or down-weighting high-variance sub-heads yields better calibration error (ECE) and out-of-distribution robustness.
+
+
+5.
+Kolmogorov-Arnold Networks (KANs) — Spline Regularization for High-Dimensional Tabular LearningAnchor Paper: "KAN: Kolmogorov-Arnold Networks" (Liu et al., ICLR 2025).Official Code: Public GitHub repository (KindXiaoming/pykan and community-accelerated Blealtan/efficient-kan).Free GPU Feasibility: High. A 2-to-3 layer KAN trained on standard OpenML tabular datasets takes under 5 minutes on a free Colab GPU.The Core Mechanism: KANs replace fixed activation functions at the nodes with learnable non-linear univariate B-spline functions placed directly on the edges (inspired by the Kolmogorov-Arnold representation theorem). This provides continuous interpretability and symbolic function extraction.The Documented Gap & OpenReview Critique:Original Limitation: KANs were primarily evaluated on low-dimensional physics equations and simple functions. When applied to high-dimensional datasets or noisy tabular data, the learnable B-splines overfit locally to outliers, leading to high-frequency spline oscillations that ruin generalization.Your Novel Extension (Publication Scope):Introduce Curvature-Penalized Spline Regularization (adding a Total Variation or second-derivative penalty $\int \vert{}f''(x)\vert{}^2 dx$ to the loss function) to enforce global smoothness across spline edges.Benchmark your Smooth-KAN against default KAN, standard MLPs, and XGBoost on 5 diverse OpenML benchmarks, showing lower parameter counts and higher out-of-distribution robustness.
+
+
+6.
+1. Selective Graph Rewiring
+Instead of always modifying the graph, first predict whether rewiring will help. Then add or remove edges only when necessary.
+Starting papers: FoSR (2023) and Over-Squashing and Causal Rewiring (2025).
+Code: FoSR · Over-Squashing Measurement
+Important finding: The 2025 paper reports that rewiring does not consistently improve performance, especially when over-squashing is already limited. This supports investigating selective rewiring rather than applying it to every graph
+
+7.
