@@ -1,0 +1,66 @@
+{
+    "function": "bin\\model.main",
+    "gpus": [
+        "NVIDIA GeForce RTX 3050 Laptop GPU"
+    ],
+    "config": {
+        "seed": 0,
+        "batch_size": 256,
+        "patience": 16,
+        "n_epochs": -1,
+        "gradient_clipping_norm": 1.0,
+        "amp": true,
+        "data": {
+            "cache": true,
+            "path": "data/california",
+            "num_policy": "noisy-quantile"
+        },
+        "optimizer": {
+            "type": "AdamW",
+            "lr": 0.000872489003621806,
+            "weight_decay": 0.03777165108799435
+        },
+        "model": {
+            "arch_type": "tabm",
+            "k": 32,
+            "share_training_batches": false,
+            "backbone": {
+                "type": "MLP",
+                "n_blocks": 3,
+                "d_block": 400,
+                "dropout": 0.20769705860329654
+            }
+        }
+    },
+    "n_parameters": 438688,
+    "prediction_type": "labels",
+    "epoch_size": 52,
+    "best_step": 14872,
+    "metrics": {
+        "train": {
+            "rmse": 0.34144816457763716,
+            "mae": 0.23537160456180573,
+            "r2": 0.9134451150894165,
+            "score": -0.34144816457763716
+        },
+        "val": {
+            "rmse": 0.44464585112572114,
+            "mae": 0.2847554087638855,
+            "r2": 0.8483667969703674,
+            "score": -0.44464585112572114
+        },
+        "test": {
+            "rmse": 0.4543965847707651,
+            "mae": 0.296516478061676,
+            "r2": 0.8416538238525391,
+            "score": -0.4543965847707651
+        }
+    },
+    "time": "0:04:01.530924",
+    "chunk_size": null,
+    "eval_batch_size": 32768,
+    "heads": [
+        29
+    ],
+    "head_selection_time": "0:00:00.049019"
+}

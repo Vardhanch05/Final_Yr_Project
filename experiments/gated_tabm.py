@@ -508,6 +508,8 @@ def select_greedy_heads_tabm(
 
     cur = head_scores[best_head]
     selected = [best_head]
+    best_score_so_far = cur
+    best_prefix = list(selected)
     remaining = [h for h in range(K) if h != best_head]
 
     while remaining:
@@ -527,6 +529,64 @@ def select_greedy_heads_tabm(
         # 1. No new submodel improves the current collective metric (not better(m, cur))
         # 2. Current collective metric already beats the full 32-head ensemble (better(cur, full))
         if best_cand_score <= cur and cur > full_ensemble_score:
+            break
+
+        selected.append(best_cand)
+        remaining.remove(best_cand)
+        cur = best_cand_score
+        if cur > best_score_so_far:
+            best_score_so_far = cur
+            best_prefix = list(selected)
+
+    return best_prefix
+
+
+def select_greedy_heads_repo_variant(
+    val_preds: torch.Tensor,
+    y_val: torch.Tensor,
+    task_type: Literal['regression', 'binclass'] = 'regression',
+) -> List[int]:
+    """
+    Official repository bin/model.py TabM[G] variant:
+    Stops immediately at the first step where no single candidate head improves
+    the current collective validation score.
+    """
+    if val_preds.ndim == 3 and val_preds.shape[-1] == 1:
+        val_preds = val_preds.squeeze(-1)
+    X = val_preds.detach().cpu().numpy().astype(np.float64)
+    y = y_val.detach().cpu().reshape(-1).numpy().astype(np.float64)
+    N, K = X.shape
+
+    def compute_score(p):
+        if task_type == 'binclass':
+            p_c = np.clip(p, 1e-7, 1 - 1e-7)
+            try:
+                return float(roc_auc_score(y, p_c))
+            except ValueError:
+                return 0.5
+        else:
+            return -float(np.sqrt(np.mean((y - p) ** 2)))
+
+    head_scores = [compute_score(X[:, i]) for i in range(K)]
+    best_head = int(np.argmax(head_scores))
+
+    cur = head_scores[best_head]
+    selected = [best_head]
+    remaining = [h for h in range(K) if h != best_head]
+
+    while remaining:
+        best_cand = None
+        best_cand_score = -float('inf')
+
+        for candidate in remaining:
+            score = compute_score(X[:, selected + [candidate]].mean(axis=1))
+            if score > best_cand_score:
+                best_cand_score = score
+                best_cand = candidate
+
+        assert best_cand is not None
+
+        if best_cand_score <= cur:
             break
 
         selected.append(best_cand)

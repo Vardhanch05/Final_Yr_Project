@@ -645,7 +645,7 @@ def main(
             'metrics' not in report
             or metrics['val']['score'] > report['metrics']['val']['score']
         ):
-            print('🌸 New best epoch! 🌸')
+            print('>>> New best epoch!')
             report['best_step'] = step
             report['metrics'] = metrics
             save_checkpoint()
@@ -667,6 +667,7 @@ def main(
     report['chunk_size'] = chunk_size
     report['eval_batch_size'] = eval_batch_size
     lib.dump_predictions(output, predictions)
+    np.savez(Path(output) / 'head_predictions.npz', **head_predictions)
     lib.dump_summary(output, lib.summarize(report))
     save_checkpoint()
 
