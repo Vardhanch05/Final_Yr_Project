@@ -235,11 +235,16 @@ class PostHocTabMAggregator(nn.Module):
         val_preds: torch.Tensor,
         y_val: torch.Tensor,
         n_splits: int = 3,
-        seed: int = 42
+        seed: int = 42,
+        timestamps_or_indices: Optional[np.ndarray] = None,
     ) -> Dict[str, Any]:
         """
         Contiguous Blocked Inner CV over (lr, kl_weight) matching temporal TabReD dynamics.
         """
+        if timestamps_or_indices is not None:
+            assert np.all(np.diff(timestamps_or_indices) > 0), (
+                "Validation rows must be strictly monotonically sorted in chronological order for forward-chained CV!"
+            )
         val_preds, y_val = self._normalize_inputs(val_preds, y_val)
         N = len(val_preds)
 
