@@ -16,14 +16,14 @@ Does post-hoc, sample-adaptive weighting (and robust parametric/non-parametric a
 ### Primary Hypothesis (H1: Real Distribution Shift)
 - **Claim:** Sample-adaptive gating outperforms uniform averaging on tabular benchmarks exhibiting temporal distribution shift.
 - **Evaluation Set:** The 8 official **TabReD** industrial temporal benchmarks with fixed chronological splits:
-  1. `weather` (regression)
-  2. `sberbank-housing` (regression)
-  3. `cooking-time` (regression)
-  4. `delivery-eta` (regression)
-  5. `ecom-offers` (binclass)
-  6. `homecredit-default` (binclass)
-  7. `homesite-insurance` (binclass)
-  8. `maps-routing` (regression)
+  1. `cooking-time` (regression)
+  2. `delivery-eta` (regression)
+  3. `ecom-offers` (binary classification)
+  4. `homecredit-default` (binary classification)
+  5. `homesite-insurance` (binary classification)
+  6. `maps-routing` (regression)
+  7. `sberbank-housing` (regression)
+  8. `weather` (regression)
 - **Statistical Test:** Two-sided paired Wilcoxon Signed-Rank Test across the 8 dataset-level means ($\alpha = 0.05$). Minimum exact two-sided p-value for $N=8$ is $p \approx 0.0078$.
 
 ### Secondary Hypothesis Family (H2..H6: Competitor Hierarchy)
@@ -32,7 +32,7 @@ Does post-hoc, sample-adaptive weighting (and robust parametric/non-parametric a
   2. `Trimmed Mean` (Symmetric trimming fraction $p \in [0.05, 0.20]$ tuned on val)
   3. `Affine Recalibration` ($y \approx a \cdot \mu + b$ fitted on validation split)
   4. `Global Stacking` (Static non-negative weights on simplex via SLSQP)
-  5. `TabM[G] Greedy` (Submodel forward selection)
+  5. `TabM[G], Appendix D.6 with best-prefix` (Submodel forward selection)
 - **Multiplicity Correction:** Step-Down Holm-Bonferroni correction over the 5 secondary hypothesis tests ($\alpha = 0.05$).
 
 ### Secondary Control Family (No Shift)
@@ -48,46 +48,60 @@ Does post-hoc, sample-adaptive weighting (and robust parametric/non-parametric a
 
 ## 3. Decision Framework & Equivalence Testing
 
-### Equivalence Testing Framework
+### Practical Equivalence Testing Framework
 - **Practical Equivalence Margin ($\Delta$):** $\pm 0.50\%$ relative metric change.
-  - *Justification:* In the TabM paper, the overall architecture advantage of TabM over baseline MLP is $\approx 2.15\%$. A threshold of $\pm 0.5\%$ is $< \frac{1}{4}$ of the core ensembling gain and is within empirical seed standard deviations ($\sigma_{\text{seed}} \approx 0.1\% - 0.4\%$).
-- **Equivalence Rule:** Equivalence to naive uniform averaging is declared if the **90% Confidence Interval** (corresponding to two one-sided tests at $\alpha=0.05$) of the median relative delta across datasets lies strictly within $[-\Delta, +\Delta] = [-0.50\%, +0.50\%]$.
-- *Statistical Power Caveat:* With $N=8$ datasets, confidence intervals on the median may be wide, and formal equivalence may be inconclusive if confidence bounds exceed $\pm 0.5\%$. This is acknowledged a priori.
+  - *Justification:* In the TabM paper, the overall architecture advantage of TabM over baseline MLP is $\approx 2.15\%$. A threshold of $\pm 0.50\%$ is $< \frac{1}{4}$ of the core ensembling gain and is within empirical seed standard deviations ($\sigma_{\text{seed}} \approx 0.1\% - 0.4\%$).
+- **Equivalence Rule:** Equivalence to naive uniform averaging is declared if the **90% Confidence Interval** (equivalent to two one-sided tests at $\alpha=0.05$) of the median relative delta across datasets lies strictly within $[-\Delta, +\Delta] = [-0.50\%, +0.50\%]$.
+- *Statistical Power Caveat:* With $N=8$ datasets, confidence intervals on the median will be wide. If the 90% CI spans zero but extends beyond $\pm 0.50\%$, the outcome is formally classified as *inconclusive* (insufficient sample size to confirm equivalence).
 
-### Pre-Registered Tie Rule
-- **Definition:** An observed gain $\Delta$ is classified as a "Tie" if $|\Delta| \le \sigma_{\text{seed}}$, where $\sigma_{\text{seed}} = \frac{1}{D}\sum_d \mathrm{std}_{s}(\Delta_{d,s})$ is the mean cross-seed standard deviation observed for that comparison.
+### Pre-Registered Data-Dependent Tie Rule
+- **Definition:** An observed gain $\Delta$ for a comparison is classified as a "Tie" if $|\Delta| \le \sigma_{\text{seed}}$, where:
+  $$\sigma_{\text{seed}} = \frac{1}{D}\sum_{d=1}^D \mathrm{std}_{s}(\Delta_{d,s})$$
+  is the mean cross-seed standard deviation observed across the evaluated seeds ($s \in \{0, 1, 2, 3, 4\}$).
 - **Metric Definitions:**
   - Regression: Relative change in RMSE ($\frac{\text{RMSE}_{\text{base}} - \text{RMSE}_{\text{cand}}}{\text{RMSE}_{\text{base}}} \times 100\%$).
   - Binary Classification: Relative error-reduction in ROC-AUC ($\frac{\text{AUC}_{\text{cand}} - \text{AUC}_{\text{base}}}{1.0 - \text{AUC}_{\text{base}}} \times 100\%$).
+  *(Note: Regression percentages and classification error-reduction percentages are tracked and reported with explicit task units).*
 
 ---
 
 ## 4. Aggregator Specification & TabM[G] Variants
 
-### TabM[G] Specifications
-1. **Primary TabM[G] Baseline (Paper Appendix D.6)**:
+### TabM[G] Variants
+1. **Primary TabM[G] Baseline ("TabM[G], D.6 with best-prefix")**:
    - Forward greedy selection stopping when **two conditions hold simultaneously**:
      1. No candidate head strictly improves the collective validation score (`best_cand_score <= cur`).
      2. The current collective score beats the full 32-head ensemble (`cur > full_ensemble_score`).
-   - **Prefix Policy:** Returns the highest-scoring validation prefix encountered during the search, preventing tail degradation if non-improving steps are traversed.
-2. **Secondary TabM[G] Variant (Official Repository `model.py`)**:
+   - **Prefix Policy:** Returns the highest-scoring validation prefix encountered during the search, preventing tail degradation if non-improving steps are traversed before beating the full ensemble.
+2. **Secondary TabM[G] Variant ("TabM[G], official repository model.py variant")**:
    - Stops immediately at the first step where no single candidate head improves the current score, without comparing against the full ensemble.
 
 ### Sample-Adaptive Gate
 - **Architecture:** Permutation-equivariant scoring network:
-  $s_k(x) = \text{ScoreNet}([ \hat{y}_k(x) - \mu(x),\, \ln \sigma(x) ])$.
+  $$s_k(x) = \text{ScoreNet}([ \hat{y}_k(x) - \mu(x),\, \ln \sigma(x) ])$$
 - **Bounds:** Strictly bounded outputs via $\tanh$, centered at uniform weights at initialization ($\text{weights} = \frac{1}{K}$ when unoptimized).
 - **Optimization:** Fitted on validation predictions with forward-chaining expanding window cross-validation over $(\text{lr}, \lambda_{\text{KL}})$ and early stopping. Zero training on future slices.
 
 ---
 
-## 5. Model Architecture & Training Hyperparameters
+## 5. Model Architectures & Training Hyperparameters
 
-- **Backbone Variant:** Plain BatchEnsemble (`arch_type='tabm'`) with independent per-head batch sampling (`share_training_batches=False`).
-- **Development Set (California Housing Reproduction):**
-  - Architecture: `n_blocks: 3, d_block: 400, dropout: 0.2077`
-  - Optimizer: `AdamW(lr=0.0008725, weight_decay=0.03777)`
-  - Split: Official fixed split (13,209 train / 3,303 val / 4,128 test)
-  - Early stopping: `patience=16`, monitoring validation RMSE until convergence.
-- **Confirmatory TabReD Datasets:**
-  - Evaluated using official tuned hyperparameters and official chronological train/val/test splits.
+All backbone models use plain BatchEnsemble (`arch_type='tabm'`) with independent per-head batch permutations (`share_training_batches=False`), $k=32$ heads, noisy-quantile normalization, AdamW optimizer, and early stopping with `patience=16` consecutive epochs without validation improvement (with no arbitrary epoch caps).
+
+### Pre-Registered Tuned Hyperparameter Configurations
+*(Extracted directly from official repository `exp/tabm/*/0-evaluation/0.toml` files)*
+
+| Dataset | Family | Task Type | Blocks | Width | Dropout | Learning Rate | Weight Decay | Batch Size | Patience |
+|:---|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **california** | Dev (Fixed Split) | Regression | 3 | 400 | 0.2077 | 0.0008725 | 0.03777 | 256 | 16 |
+| **cooking-time** | Primary (TabReD) | Regression | 2 | 176 | 0.0000 | 0.0027720 | 0.00013 | 1024 | 16 |
+| **delivery-eta** | Primary (TabReD) | Regression | 4 | 192 | 0.0000 | 0.0007092 | 0.00000 | 1024 | 16 |
+| **ecom-offers** | Primary (TabReD) | BinClass (AUC) | 1 | 528 | 0.0644 | 0.0010951 | 0.00000 | 1024 | 16 |
+| **homecredit-default** | Primary (TabReD) | BinClass (AUC) | 5 | 560 | 0.0000 | 0.0014221 | 0.00027 | 1024 | 16 |
+| **homesite-insurance** | Primary (TabReD) | BinClass (AUC) | 2 | 1024 | 0.3780 | 0.0011447 | 0.00000 | 1024 | 16 |
+| **maps-routing** | Primary (TabReD) | Regression | 3 | 192 | 0.0000 | 0.0013713 | 0.00000 | 1024 | 16 |
+| **sberbank-housing** | Primary (TabReD) | Regression | 3 | 240 | 0.0000 | 0.0023156 | 0.00000 | 256 | 16 |
+| **weather** | Primary (TabReD) | Regression | 5 | 896 | 0.0000 | 0.0027868 | 0.00159 | 1024 | 16 |
+| **diamond** | Control (No Shift) | Regression | 3 | 432 | 0.0671 | 0.0008384 | 0.09943 | 512 | 16 |
+| **house** | Control (No Shift) | Regression | 5 | 784 | 0.0000 | 0.0020846 | 0.00014 | 256 | 16 |
+| **black-friday** | Control (No Shift) | Regression | 2 | 1024 | 0.1631 | 0.0011783 | 0.00208 | 512 | 16 |
