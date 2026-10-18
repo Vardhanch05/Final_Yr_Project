@@ -340,6 +340,8 @@ def main(
     lib.print_config(config)  # type: ignore[code]
     delu.random.seed(config['seed'])
     device = lib.get_device()
+    if torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats()
     report = lib.create_report(main, config)
 
     # >>> Data
@@ -657,6 +659,10 @@ def main(
 
         print()
     report['time'] = str(timer)
+    if torch.cuda.is_available():
+        report['peak_gpu_memory_allocated_mb'] = float(torch.cuda.max_memory_allocated() / (1024 * 1024))
+        report['peak_gpu_memory_reserved_mb'] = float(torch.cuda.max_memory_reserved() / (1024 * 1024))
+        print(f"[*] Peak GPU memory: allocated={report['peak_gpu_memory_allocated_mb']:.1f} MB, reserved={report['peak_gpu_memory_reserved_mb']:.1f} MB")
 
     # >>>
     if lib.get_checkpoint_path(output).exists():
