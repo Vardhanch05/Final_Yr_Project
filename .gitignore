@@ -61,3 +61,5 @@ tmp/
 experiments/cache/
 tabm/paper/local/
 tabm/paper/data/
+*timing_test/
+*timing_profile/

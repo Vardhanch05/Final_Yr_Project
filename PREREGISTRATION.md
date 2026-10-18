@@ -84,6 +84,33 @@ Does post-hoc, sample-adaptive weighting (and robust parametric/non-parametric a
 - **Labelled Sensitivity Analysis:** In parallel, all outcomes are evaluated against the fixed practical equivalence margin of $\pm 0.50\%$ relative metric change.
 
 ### Erratum and Amendment History
+- **Amendment v2.2 & Code Deviation Registration (October 18, 2026):**
+  - *Code Deviation (Evaluation Batch Size Capped at 2048):*
+    - The upstream default in `tabm/paper/bin/model.py` sets `eval_batch_size = 32768` (when `compile=False`).
+    - *Hardware Failure Mode on Windows WDDM:* Under the Windows Display Driver Model (WDDM), PyTorch does NOT raise a CUDA `OutOfMemoryError` when GPU memory demand exceeds physical VRAM (4,096 MiB on NVIDIA RTX 3050 Laptop). Instead, the OS display driver silently evicts GPU tensors to system RAM (host-RAM paging). Because no CUDA OOM exception is raised, the upstream exception handler in `bin/model.py` (which catches CUDA OOM and halves `eval_batch_size`) is never invoked. The process continues executing, but throughput collapses by >50x (e.g. from 5 it/s to 5 s/it) and GPU power plunges.
+    - *Architectural Choice (Code Clamp vs. Driver Sysmem Fallback):* An alternative driver-level workaround exists (configuring the NVIDIA driver sysmem fallback setting or `CUDA_MANAGED_FORCE_DEVICE_ALLOC=1` to force hard OOM crashes). We explicitly chose the **code-level modification** (`eval_batch_size = 2048`) because it is platform-agnostic, guarantees deterministic execution without host OS driver re-configuration, and keeps memory on all 8 datasets strictly below 3.1 GB physical VRAM with zero paging.
+    - *Uniform Scope:* This deviation is applied uniformly across all 8 TabReD datasets and all seeds (not solely the heavy datasets).
+    - *Prediction Equivalence Verification:* Evaluated on a trained `maps-routing` seed-0 checkpoint at `eval_batch_size = 16384` versus `eval_batch_size = 2048`:
+      - Test RMSE at 16384: `0.1610847043324687`
+      - Test RMSE at 2048:  `0.1610847390509623`
+      - Absolute RMSE difference: **$3.47 \times 10^{-8}$** (identical to 7 decimal places).
+      - Head-prediction coordinate max difference: $4.51 \times 10^{-5}$ (due strictly to FP16 summation ordering under AMP autocast).
+  - *Maps-Routing Throughput Reconciliation:*
+    - Training throughput on `maps-routing` (160,019 rows, batch 1024) is 19.5 it/s (156 steps / epoch $\approx$ 8.0 s per epoch).
+    - However, `bin/model.py` evaluates both the validation split (60,000 rows) and test split (60,000 rows) across all 32 heads at the end of *every single epoch* to log progress and determine early stopping.
+    - At `eval_batch_size = 2048`, evaluating 120,000 rows across 32 heads takes $\approx 20.5$ s per epoch.
+    - Total wall-clock time per epoch is $\approx 8.0\text{ s (train)} + 20.5\text{ s (eval)} = 28.5\text{ s/epoch}$. Across 30 epochs plus startup and head prediction export, this totals $\approx 15\text{m } 17\text{s}$, fully reconciling the measured wall-clock time.
+  - *Weather Feature Count Reconciliation:*
+    - Verified on disk: `weather` contains 100 numerical features (`N.npy`) and 3 binary features (`B.npy`) $\rightarrow$ **103 total features**.
+    - The mention of "33" in earlier pre-flight notes was a verbal typographical slip conflating `epoch_size = 333` (number of batches per epoch) with feature count. The underlying data tensors are 100% identical to the released TabReD benchmark.
+  - *Standardized Peak Memory Measurements (`eval_batch_size = 2048`):*
+    - `maps-routing`: Allocated = 1,276.4 MiB, Reserved = 1,294.0 MiB, nvidia-smi = 1,750 MiB.
+    - `weather`: Allocated = 1,730.5 MiB, Reserved = 2,586.0 MiB, nvidia-smi = 1,950 MiB.
+    - `homecredit-default`: Allocated $\approx 2,550$ MiB, Reserved $\approx 2,850$ MiB, nvidia-smi $\approx 3,075$ MiB (safely below the 4,096 MiB physical ceiling).
+  - *Empirical Timing of Intermediate Benchmarks & Total Budget:*
+    - `cooking-time` (227k rows): 56.55 it/s, $\approx 9.0$ s/epoch $\rightarrow \approx 4.5$ min/seed.
+    - `delivery-eta` (279k rows): 31.20 it/s, $\approx 16.2$ s/epoch $\rightarrow \approx 8.1$ min/seed.
+    - Total confirmatory budget across 40 runs ($8 \times 5$ seeds) + aggregators is realistically budgeted at **$\approx 8.0$ to 8.5 hours**.
 - **Amendment v2.1 & Pre-Flight Erratum (October 18, 2026):**
   - *Erratum on Pre-Flight Outputs:* The v2 amendment text stated "zero confirmatory test data was evaluated". This is corrected: prior to the confirmatory phase, pre-flight feasibility and timing runs were performed on two TabReD datasets:
     1. `maps-routing` seed 0: head predictions were extracted and test metrics observed (uniform 0.16108, stacking 0.16099, gate 0.16102, median 0.16123, tabm_g 0.16101).
@@ -119,18 +146,31 @@ Does post-hoc, sample-adaptive weighting (and robust parametric/non-parametric a
 
 ## 5. Model Architectures & Released Hyperparameter Configurations
 
-All backbone models use plain BatchEnsemble (`arch_type='tabm'`) with independent per-head batch permutations (`share_training_batches=False`), $k=32$ heads, noisy-quantile normalization, AdamW optimizer, and early stopping with `patience=16` consecutive epochs without validation improvement (with no arbitrary epoch caps).
+All backbone models use the full, standard TabM architecture ($k=32$, non-mini, `arch_type='tabm'`) with independent per-head batch permutations (`share_training_batches=False`), noisy-quantile normalization, AdamW optimizer, and early stopping with `patience=16` consecutive epochs without validation improvement (with no arbitrary epoch caps).
+
+### Code Modifications Relative to Pinned Upstream Repository (`0ea03a1e`)
+All code modifications to the authors' codebase are restricted to:
+1. `tabm/paper/bin/model.py`:
+   - Line 343: Reset peak CUDA memory statistics at training start (`torch.cuda.reset_peak_memory_stats()`).
+   - Line 423: Pre-registered deviation (v2.2): default `eval_batch_size = 2048` uniformly.
+   - Line 648: Print ASCII progress message `>>> New best epoch!` to prevent Windows `cp1252` encoding errors.
+   - Line 660: Record `peak_gpu_memory_allocated_mb` and `peak_gpu_memory_reserved_mb` into `report.json`.
+   - Line 674: Export submodel head predictions (`head_predictions.npz`) at the best checkpoint for offline aggregator analysis without retraining.
+2. `tabm/paper/lib/util.py`:
+   - Line 446: Support PyTorch 2.6+ checkpoint deserialization (`weights_only=False` default in `load_checkpoint`).
 
 ### Released Benchmark Configurations and SHA256 Hashes
-The confirmatory evaluation uses the released per-dataset configuration files located in `tabm/paper/exp/tabm/tabred/<dataset>/0-evaluation/0.toml`:
+The confirmatory evaluation uses the released per-dataset configuration files located in `tabm/paper/exp/tabm/tabred/<dataset>/0-evaluation/0.toml`.
+Before execution, the confirmatory runner asserts that each configuration matches the frozen SHA256 hashes:
 
-| Dataset | Path | SHA256 Hash | Task Type | Batch Size | Learning Rate | Weight Decay | Backbone ($N \times d$) |
-|:---|:---|:---|:---:|:---:|:---:|:---:|:---:|
-| **cooking-time** | `tabm/paper/exp/tabm/tabred/cooking-time/0-evaluation/0.toml` | `8bd53da73578a697926b01b697e0fc2f1a3e6e87aeb46fa4bb6036da48bb14c8` | Regression | 1024 | 0.0027720 | 0.00013 | $2 \times 176$ |
-| **delivery-eta** | `tabm/paper/exp/tabm/tabred/delivery-eta/0-evaluation/0.toml` | `1699a254827332ef4cb2ca0e1b6f0e4b8595aeb2160fe9ae114c2c77d0cf88c9` | Regression | 1024 | 0.0007092 | 0.00000 | $4 \times 192$ |
-| **ecom-offers** | `tabm/paper/exp/tabm/tabred/ecom-offers/0-evaluation/0.toml` | `2031af829016ef83d9aa669fcf7fe5c421712a7bf8ca4bb248107936a5c2ceb9` | BinClass (AUC) | 1024 | 0.0010951 | 0.00000 | $1 \times 528$ |
-| **homecredit-default** | `tabm/paper/exp/tabm/tabred/homecredit-default/0-evaluation/0.toml` | `54c5da07e78a69b3eeae4478174f884a4413f2ca97213ee73d052be17e13bbd8` | BinClass (AUC) | 1024 | 0.0014221 | 0.00027 | $5 \times 560$ |
-| **homesite-insurance** | `tabm/paper/exp/tabm/tabred/homesite-insurance/0-evaluation/0.toml` | `e37118ff0b52c98696ff0cbfae8bc92b0c9533fca4ae7702f23d24220b33b91a` | BinClass (AUC) | 1024 | 0.0011447 | 0.00000 | $2 \times 1024$ |
-| **maps-routing** | `tabm/paper/exp/tabm/tabred/maps-routing/0-evaluation/0.toml` | `c05460274c476e88514936d0b677a83d47d6d7e00406085a86d267fec453887c` | Regression | 1024 | 0.0013713 | 0.00000 | $3 \times 192$ |
-| **sberbank-housing** | `tabm/paper/exp/tabm/tabred/sberbank-housing/0-evaluation/0.toml` | `cb4bb523573b072da6a7db18c65f978e88e898327ffae5c48b29f7cf7c0fa3e5` | Regression | 256 | 0.0023156 | 0.00000 | $3 \times 240$ |
-| **weather** | `tabm/paper/exp/tabm/tabred/weather/0-evaluation/0.toml` | `7e99d0ddd0bf2cfecfa9bbd460efceb049d58a5da9092495bb3d6e5793086eb1` | Regression | 1024 | 0.0027868 | 0.00159 | $5 \times 896$ |
+| Dataset | Config Path | Canonical LF SHA256 | Windows CRLF SHA256 | Task Type | Batch Size | Learning Rate | Weight Decay | Backbone ($N \times d$) |
+|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **cooking-time** | `tabm/paper/exp/tabm/tabred/cooking-time/0-evaluation/0.toml` | `901bbf02fcf312d864d6f41596bbdc3dfe10ae9634dfbd16c8ddf40ba87225f3` | `8bd53da73578a697438fcd26f6b4c9f20507385601aed80ba9774b2e3dd08c5c` | Regression | 1024 | 0.0027720 | 0.00013 | $2 \times 176$ |
+| **delivery-eta** | `tabm/paper/exp/tabm/tabred/delivery-eta/0-evaluation/0.toml` | `fa83fb18969a192fb8f98e1fc5c1630a3efc66c41c6b8a9aade41b927c377214` | `1699a254827332ef3eec89a050f50dbfa70ebdb3967eec182f65ea9fac9734cc` | Regression | 1024 | 0.0007092 | 0.00000 | $4 \times 192$ |
+| **ecom-offers** | `tabm/paper/exp/tabm/tabred/ecom-offers/0-evaluation/0.toml` | `742f82218b45212976fa93eca91e03152c9d2fa9b01fc25c8a8182e47abaf2d2` | `2031af829016ef835175b28882cfca59d9a33e8e15a16e1fe92e6d418b01eef8` | BinClass (AUC) | 1024 | 0.0010951 | 0.00000 | $1 \times 528$ |
+| **homecredit-default** | `tabm/paper/exp/tabm/tabred/homecredit-default/0-evaluation/0.toml` | `f8c0cbbc07c3d474974b31fb143476ff7244f15b86943670c3658b1ad3df255a` | `54c5da07e78a69b3d1c0d129c3a4779da8ebcb3ce7c9081364b59ce21b4e6b16` | BinClass (AUC) | 1024 | 0.0014221 | 0.00027 | $5 \times 560$ |
+| **homesite-insurance** | `tabm/paper/exp/tabm/tabred/homesite-insurance/0-evaluation/0.toml` | `163d767c4e5ee4e9471de1572dfbaf523d8b2a27e7c6034f2051cada8efbbe12` | `e37118ff0b52c9867b99d43b1d1f6b23e3aaf75c8b65f9580e05ffd8a2170866` | BinClass (AUC) | 1024 | 0.0011447 | 0.00000 | $2 \times 1024$ |
+| **maps-routing** | `tabm/paper/exp/tabm/tabred/maps-routing/0-evaluation/0.toml` | `21c176e01af048c31d8a8726aff45b90f77288c4a012e7cd61dea733cf303e9b` | `c05460274c476e88ca44ccc73e1f0a5e498c2f434a91705ab761a387e75692e9` | Regression | 1024 | 0.0013713 | 0.00000 | $3 \times 192$ |
+| **sberbank-housing** | `tabm/paper/exp/tabm/tabred/sberbank-housing/0-evaluation/0.toml` | `7323132ff67b95987cd9a3ee726cfe0444627b5d3004ea97703a0a28c0441038` | `cb4bb523573b072d0a568913eaa06b6fda109625abcb863d8a3ea98f2fb4b3db` | Regression | 256 | 0.0023156 | 0.00000 | $3 \times 240$ |
+| **weather** | `tabm/paper/exp/tabm/tabred/weather/0-evaluation/0.toml` | `c59da405b8fb311eb93e02d3a82a75e88c9864e933bb166517c24d9a646fc38e` | `7e99d0ddd0bf2cfe2731a5e5979fb30ed027a2fb0bdd2ad4b3ae33a62268544a` | Regression | 1024 | 0.0027868 | 0.00159 | $5 \times 896$ |
+

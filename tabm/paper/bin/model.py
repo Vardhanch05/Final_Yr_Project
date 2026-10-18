@@ -421,9 +421,7 @@ def main(
     report['epoch_size'] = epoch_size = math.ceil(dataset.size('train') / batch_size)
     eval_batch_size = config.get(
         'eval_batch_size',
-        # With torch.compile,
-        # the largest possible evaluation batch size is noticeably smaller.
-        2048 if config.get('compile', False) else 32768,
+        2048,  # Pre-registered deviation (v2.2): capped at 2048 uniformly across all datasets to prevent Windows WDDM host-RAM paging
     )
     chunk_size = None  # Currently, not used.
     share_training_batches = config['model'].get(
