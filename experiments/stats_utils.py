@@ -192,3 +192,24 @@ def compute_win_loss_tie(
     losses = int(np.sum(improvements < -tie_threshold))
     ties = int(np.sum(np.abs(improvements) <= tie_threshold))
     return wins, losses, ties
+
+
+def compute_baseline_noise_threshold(
+    baseline_scores: np.ndarray,
+    task_type: str = 'regression',
+    ddof: int = 1
+) -> float:
+    """
+    Computes candidate-independent baseline relative noise threshold over S seeds (Amended v2.1).
+    - Regression (RMSE): std(RMSE, ddof=1) / mean(RMSE) * 100%
+    - Classification (ROC-AUC): std(AUC, ddof=1) / (1.0 - mean(AUC)) * 100%
+    Units match the relative error reduction metric Delta_d exactly.
+    """
+    scores = np.asarray(baseline_scores, dtype=np.float64)
+    std_val = float(np.std(scores, ddof=ddof))
+    mean_val = float(np.mean(scores))
+    if task_type == 'regression':
+        return float(std_val / max(mean_val, 1e-12) * 100.0)
+    else:
+        return float(std_val / max(1.0 - mean_val, 1e-6) * 100.0)
+
