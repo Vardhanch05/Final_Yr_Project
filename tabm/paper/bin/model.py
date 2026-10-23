@@ -340,6 +340,8 @@ def main(
     lib.print_config(config)  # type: ignore[code]
     delu.random.seed(config['seed'])
     device = lib.get_device()
+    if torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats()
     report = lib.create_report(main, config)
 
     # >>> Data
@@ -419,9 +421,7 @@ def main(
     report['epoch_size'] = epoch_size = math.ceil(dataset.size('train') / batch_size)
     eval_batch_size = config.get(
         'eval_batch_size',
-        # With torch.compile,
-        # the largest possible evaluation batch size is noticeably smaller.
-        2048 if config.get('compile', False) else 32768,
+        2048,  # Pre-registered deviation (v2.2): capped at 2048 uniformly across all datasets to prevent Windows WDDM host-RAM paging
     )
     chunk_size = None  # Currently, not used.
     share_training_batches = config['model'].get(
@@ -645,7 +645,7 @@ def main(
             'metrics' not in report
             or metrics['val']['score'] > report['metrics']['val']['score']
         ):
-            print('🌸 New best epoch! 🌸')
+            print('>>> New best epoch!')
             report['best_step'] = step
             report['metrics'] = metrics
             save_checkpoint()
@@ -657,6 +657,10 @@ def main(
 
         print()
     report['time'] = str(timer)
+    if torch.cuda.is_available():
+        report['peak_gpu_memory_allocated_mb'] = float(torch.cuda.max_memory_allocated() / (1024 * 1024))
+        report['peak_gpu_memory_reserved_mb'] = float(torch.cuda.max_memory_reserved() / (1024 * 1024))
+        print(f"[*] Peak GPU memory: allocated={report['peak_gpu_memory_allocated_mb']:.1f} MB, reserved={report['peak_gpu_memory_reserved_mb']:.1f} MB")
 
     # >>>
     if lib.get_checkpoint_path(output).exists():
@@ -667,6 +671,7 @@ def main(
     report['chunk_size'] = chunk_size
     report['eval_batch_size'] = eval_batch_size
     lib.dump_predictions(output, predictions)
+    np.savez(Path(output) / 'head_predictions.npz', **head_predictions)
     lib.dump_summary(output, lib.summarize(report))
     save_checkpoint()
 

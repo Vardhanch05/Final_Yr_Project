@@ -70,12 +70,20 @@ class PostHocTabMAggregator(nn.Module):
         self.register_buffer('log_sigma_max', torch.tensor(10.0))
 
         # Permutation-Equivariant Scoring Network
-        torch.manual_seed(self.seed)
+        gen = torch.Generator().manual_seed(self.seed)
         self.score_net = nn.Sequential(
             nn.Linear(2, score_net_hidden_dim),
             nn.ReLU(),
             nn.Linear(score_net_hidden_dim, 1)
         )
+        with torch.no_grad():
+            for m in self.score_net.modules():
+                if isinstance(m, nn.Linear):
+                    nn.init.kaiming_uniform_(m.weight, a=np.sqrt(5), generator=gen)
+                    if m.bias is not None:
+                        fan_in, _ = nn.init._calculate_fan_in_and_fan_out(m.weight)
+                        bound = 1.0 / np.sqrt(fan_in) if fan_in > 0 else 0
+                        nn.init.uniform_(m.bias, -bound, bound, generator=gen)
         # Zero-init last layer so initial output scores are identically zero
         nn.init.zeros_(self.score_net[-1].weight)
         nn.init.zeros_(self.score_net[-1].bias)
@@ -227,11 +235,16 @@ class PostHocTabMAggregator(nn.Module):
         val_preds: torch.Tensor,
         y_val: torch.Tensor,
         n_splits: int = 3,
-        seed: int = 42
+        seed: int = 42,
+        timestamps_or_indices: Optional[np.ndarray] = None,
     ) -> Dict[str, Any]:
         """
         Contiguous Blocked Inner CV over (lr, kl_weight) matching temporal TabReD dynamics.
         """
+        if timestamps_or_indices is not None:
+            assert np.all(np.diff(timestamps_or_indices) > 0), (
+                "Validation rows must be strictly monotonically sorted in chronological order for forward-chained CV!"
+            )
         val_preds, y_val = self._normalize_inputs(val_preds, y_val)
         N = len(val_preds)
 
@@ -242,15 +255,9 @@ class PostHocTabMAggregator(nn.Module):
             {'lr': 0.005, 'kl_weight': 0.05},
         ]
 
-        # Contiguous temporal blocks (no random shuffling across time)
-        fold_size = N // n_splits
-        folds = []
-        for f in range(n_splits):
-            start = f * fold_size
-            stop = (f + 1) * fold_size if f < n_splits - 1 else N
-            inner_val_idx = np.arange(start, stop)
-            train_idx = np.concatenate([np.arange(0, start), np.arange(stop, N)])
-            folds.append((train_idx, inner_val_idx))
+        # Forward chaining (expanding window): strictly past -> future (zero future leakage)
+        b = np.linspace(0, N, n_splits + 2, dtype=int)
+        folds = [(np.arange(0, b[i+1]), np.arange(b[i+1], b[i+2])) for i in range(n_splits)]
 
         best_params = param_grid[0]
         best_cv_loss = float('inf')
@@ -392,7 +399,12 @@ class PostHocTabMAggregator(nn.Module):
             return member_preds.mean(dim=1, keepdim=True)
 
         elif self.mode == 'median':
-            return torch.quantile(member_preds, q=0.5, dim=1, keepdim=True)
+            sorted_preds, _ = torch.sort(member_preds, dim=1)
+            if active_k % 2 == 1:
+                return sorted_preds[:, active_k // 2 : active_k // 2 + 1]
+            else:
+                mid = active_k // 2
+                return (sorted_preds[:, mid - 1 : mid] + sorted_preds[:, mid : mid + 1]) / 2.0
 
         elif self.mode == 'trimmed_mean':
             n_trim = int(active_k * self.trim_fraction)
@@ -499,32 +511,91 @@ def select_greedy_heads_tabm(
     head_scores = [compute_score(X[:, i]) for i in range(K)]
     best_head = int(np.argmax(head_scores))
 
-    greedy_idx = [best_head]
-    greedy_score = head_scores[best_head]
-    remaining_heads = set(range(K)) - {best_head}
+    cur = head_scores[best_head]
+    selected = [best_head]
+    best_score_so_far = cur
+    best_prefix = list(selected)
+    remaining = [h for h in range(K) if h != best_head]
 
-    while remaining_heads:
-        best_candidate = None
-        best_candidate_score = -float('inf')
+    while remaining:
+        best_cand = None
+        best_cand_score = -float('inf')
 
-        for candidate in remaining_heads:
-            candidate_idx = greedy_idx + [candidate]
-            candidate_pred = X[:, candidate_idx].mean(axis=1)
-            score = compute_score(candidate_pred)
-            if score > best_candidate_score:
-                best_candidate_score = score
-                best_candidate = candidate
+        for candidate in remaining:
+            score = compute_score(X[:, selected + [candidate]].mean(axis=1))
+            if score > best_cand_score:
+                best_cand_score = score
+                best_cand = candidate
 
-        # Official stopping rule (lines 762-770 in tabm/paper/bin/model.py):
-        # Must improve over current greedy score AND beat full ensemble score
-        if best_candidate_score > greedy_score and (
-            best_candidate_score > full_ensemble_score
-        ):
-            greedy_score = best_candidate_score
-            greedy_idx.append(best_candidate)
-            remaining_heads.remove(best_candidate)
-        else:
-            # Immediate stop: no non-improving heads appended
+        assert best_cand is not None
+
+        # Appendix D.6 simultaneous stopping rule:
+        # Stop only when TWO conditions hold together:
+        # 1. No new submodel improves the current collective metric (not better(m, cur))
+        # 2. Current collective metric already beats the full 32-head ensemble (better(cur, full))
+        if best_cand_score <= cur and cur > full_ensemble_score:
             break
 
-    return greedy_idx
+        selected.append(best_cand)
+        remaining.remove(best_cand)
+        cur = best_cand_score
+        if cur > best_score_so_far:
+            best_score_so_far = cur
+            best_prefix = list(selected)
+
+    return best_prefix
+
+
+def select_greedy_heads_repo_variant(
+    val_preds: torch.Tensor,
+    y_val: torch.Tensor,
+    task_type: Literal['regression', 'binclass'] = 'regression',
+) -> List[int]:
+    """
+    Official repository bin/model.py TabM[G] variant:
+    Stops immediately at the first step where no single candidate head improves
+    the current collective validation score.
+    """
+    if val_preds.ndim == 3 and val_preds.shape[-1] == 1:
+        val_preds = val_preds.squeeze(-1)
+    X = val_preds.detach().cpu().numpy().astype(np.float64)
+    y = y_val.detach().cpu().reshape(-1).numpy().astype(np.float64)
+    N, K = X.shape
+
+    def compute_score(p):
+        if task_type == 'binclass':
+            p_c = np.clip(p, 1e-7, 1 - 1e-7)
+            try:
+                return float(roc_auc_score(y, p_c))
+            except ValueError:
+                return 0.5
+        else:
+            return -float(np.sqrt(np.mean((y - p) ** 2)))
+
+    head_scores = [compute_score(X[:, i]) for i in range(K)]
+    best_head = int(np.argmax(head_scores))
+
+    cur = head_scores[best_head]
+    selected = [best_head]
+    remaining = [h for h in range(K) if h != best_head]
+
+    while remaining:
+        best_cand = None
+        best_cand_score = -float('inf')
+
+        for candidate in remaining:
+            score = compute_score(X[:, selected + [candidate]].mean(axis=1))
+            if score > best_cand_score:
+                best_cand_score = score
+                best_cand = candidate
+
+        assert best_cand is not None
+
+        if best_cand_score <= cur:
+            break
+
+        selected.append(best_cand)
+        remaining.remove(best_cand)
+        cur = best_cand_score
+
+    return selected

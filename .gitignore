@@ -20,8 +20,9 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+/lib/
+/lib64/
+!tabm/paper/lib/
 parts/
 sdist/
 var/
@@ -33,8 +34,11 @@ share/python-wheels/
 
 # PyTorch checkpoints & weights
 *.pt
+events.out.tfevents*
 *.pth
 *.ckpt
+*.npy
+*.npz
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints
@@ -54,3 +58,8 @@ desktop.ini
 scratch/
 temp/
 tmp/
+experiments/cache/
+tabm/paper/local/
+tabm/paper/data/
+*timing_test/
+*timing_profile/
